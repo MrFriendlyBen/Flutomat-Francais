@@ -20,7 +20,7 @@ Version en ligne: https://mrfriendlyben.github.io/Flutomat-Francais/
 2. Entrez le diamètre intérieur du tube et l’épaisseur de paroi
 3. Sélectionnez une tonalité et une suite d’intervalles
 4. Ajustez les diamètres des trous
-5. Cliquez sur **Calculate Positions**
+5. Cliquez sur **Calcul des Positions**
 
 ## Crédits
 
