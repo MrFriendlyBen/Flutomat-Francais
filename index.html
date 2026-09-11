@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flutomat NG - Calculateur de flute moderne</title>
+    <link rel="stylesheet" href="flutomat.css">
+</head>
+
+<body>
+    <h1>Flutomat NG - Calculateur de flûte</h1>
+
+    <form id="fluteForm">
+        <fieldset>
+            <legend>Paramètres Globaux</legend>
+            <div>
+                 <label for="units">Unités:</label>
+                <!-- <input type="radio" name="units" value="cm" id="unitsCm"> <label for="unitsCm">cm</label> -->
+                <input type="radio" name="units" value="inches" id="unitsInches" checked> <label
+                    for="unitsInches">Pouces</label>
+            </div>
+            <div>
+                <label for="temperature">Température:</label>
+                <input type="number" name="temperature" id="temperature" value="20" step="0.1" size="5">
+                <select name="tempUnit" id="tempUnit">
+                    <option value="C" selected>°C</option>
+                    <option value="F">°F</option>
+                </select>
+                <span id="speedOfSoundDisplay"></span>
+				<div>
+    				<label for="a4Frequency">Référence A4(Hz):</label>
+    				<input type="number" id="a4Frequency" value="440" min="400" max="480" step="0.1">
+			</div>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Dimensions du tube</legend>
+            <div>
+                <label for="boreDiameter">Diamètre intérieur:</label>
+                <input type="text" name="boreDiameter" id="boreDiameter" min="0.01" value="3/4" step="any" required>
+            </div>
+            <div>
+                <label for="wallThickness">Épaisseur du mur:</label>
+                <input type="text" name="wallThickness" id="wallThickness" value="1/8" required>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Fréquence visée & Dimensions des trous</legend>
+            <p>Choisir la tonalité ou entrez les fréquences manuellement. Les diamètres sont requis.</p>
+            <div>
+                <label for="keySelector">Tonalité:</label>
+                <select id="keySelector">
+                    <option value="73">B5</option>
+                    <option value="72">C5/B#5</option>
+                    <option value="71">B4</option>
+                    <option value="70">A#4/Bb4</option>
+                    <option value="69">A4</option>
+                    <option value="68">G#4/Ab4</option>
+                    <option value="67">G4</option>
+                    <option value="66">F#4/Gb4</option>
+                    <option value="65">F4</option>
+                    <option value="64">E4</option>
+                    <option value="63">D#4/Eb4</option>
+                    <option value="62" selected>D4</option>
+                    <option value="61">C#4/Db4</option>
+                    <option value="60">C4 (Middle C)</option>
+                    <option value="59">B3</option>
+                    <option value="58">A#3/Bb3</option>
+                    <option value="57">A3</option>
+                    <option value="56">G#3/Ab3</option>
+                    <option value="55">G3</option>
+                    <option value="54">F#3/Gb3</option>
+                    <option value="53">F3</option>
+                    <option value="52">E3</option>
+                    <option value="51">D#3/Eb3</option>
+                    <option value="50">D3</option>
+                    <option value="49">C#3/Db3</option>
+                    <option value="48">C3</option>
+                    <!-- Add more keys as needed -->
+                </select>
+                <div>
+                    <div>
+                <label for="scalePreset">Mode / Gamme :</label>
+                <select id="scalePreset">
+                    <option value="">— Personnalisé —</option>
+                    <option value="2212221">Majeure diatonique</option>
+                    <option value="2122212">Mineure naturelle</option>
+                    <option value="32232">Pentatonique mineure (Amérindienne)</option>
+                    <option value="22323">Pentatonique majeure</option>
+                    <option value="321132">Blues 6 trous</option>
+                    <option value="32223">Blues 5 trous</option>
+                    <option value="33132">Blues mineure</option>
+                    <option value="32322">Man Gong</option>
+                    <option value="23223">Pentatonique Écossaise</option>
+                    <option value="23232">Pentatonique égyptienne</option>
+                    <option value="22332">Pentatonique japonaise (Yo)</option>
+                    <option value="13232">Pentatonique japonaise (In)</option>
+                    <option value="21313">Hirajoshi</option>
+                    <option value="42141">Iwato</option>
+                    <option value="32121">Kumoi</option>
+                    <option value="12414">Balinaise</option>
+                    <option value="13113">Pelod (Balinaise)</option>
+                    <option value="22222">Équidistante (5 tons)</option>
+                    <option value="3333">Tétracorde</option>
+                </select>
+                </div>
+                    <label for="intervalSequence">Intervalles, nombre de demi-tons entre chaque note (ex: 221222 diatonique majeure ou 32232 pentatonique mineure ou autres) l'harmonique est atteinte par le contrôle du souffle:</label>
+                    <input type="text" id="intervalSequence" value="221222" placeholder="221222" size="15">
+                </div>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Type de trou</th>
+                        <th>Frequence cible (Hz)</th>
+                        <th>Diamètre</th>
+                        <th>Distance</th>
+						<!-- <th>Distance (Fraction)</th> -->
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Embouchure</td>
+                        <td>---------</td>
+                        <td><input type="text" name="embouchureDiameter" id="embouchureDiameter" min="0.2" value="3/8"
+                                step="any" required></td>
+                        <td style="display:none"><output name="resultEmbouchure" id="resultEmbouchure"
+                                for="embouchureDiameter boreDiameter wallThickness"></output></td>
+						<td>
+							<output
+								id="resultEmbouchureFraction">
+							</output>
+						</td>
+                    </tr>
+                    <!-- Finger Holes (Generate dynamically or list explicitly) -->
+                    <!-- Example for 6 holes -->
+                    <tr class="hole-row" data-hole-index="5">
+                        <td>Trou 6 (tous ouverts)</td>
+                        <td><input type="number" name="holeFrequency" id="freq6" value="554.37" step="any" required>
+                        </td>
+                        <td><input type="text" name="holeDiameter" id="diam6" min="0.2" value="3/8" step="any" required></td>
+                        <td style="display:none"><output name="resultHole" id="result6"></output></td>
+						<td><output id="result6Fraction"></output></td>
+                    </tr>
+                    <tr class="hole-row" data-hole-index="4">
+                        <td>Trou 5</td>
+                        <td><input type="number" name="holeFrequency" id="freq5" value="493.88" step="any" required>
+                        </td>
+                        <td><input type="text" name="holeDiameter" id="diam5" min="0.2" value="3/8" step="any" required></td>
+                        <td style="display:none"><output name="resultHole" id="result5"></output></td>
+						<td><output id="result5Fraction"></output></td>
+                    </tr>
+                    <tr class="hole-row" data-hole-index="3">
+                        <td>Trou 4</td>
+                        <td><input type="number" name="holeFrequency" id="freq4" value="440.00" step="any" required>
+                        </td>
+                        <td><input type="text" name="holeDiameter" id="diam4" min="0.2" value="5/16" step="any" required></td>
+                        <td style="display:none"><output name="resultHole" id="result4"></output></td>
+						<td><output id="result4Fraction"></output></td>
+                    </tr>
+                    <tr class="hole-row" data-hole-index="2">
+                        <td>Trou 3</td>
+                        <td><input type="number" name="holeFrequency" id="freq3" value="392.00" step="any" required>
+                        </td>
+                        <td><input type="text" name="holeDiameter" id="diam3" min="0.2" value="5/16" step="any" required></td>
+                        <td style="display:none"><output name="resultHole" id="result3"></output></td>
+						<td><output id="result3Fraction"></output></td>
+                    </tr>
+                    <tr class="hole-row" data-hole-index="1">
+                        <td>Trou 2</td>
+                        <td><input type="number" name="holeFrequency" id="freq2" value="369.99" step="any" required>
+                        </td>
+                        <td><input type="text" name="holeDiameter" id="diam2" min="0.2" value="7/16" step="any" required></td>
+                        <td style="display:none"><output name="resultHole" id="result2"></output></td>
+						<td><output id="result2Fraction"></output></td>
+                    </tr>
+                    <tr class="hole-row" data-hole-index="0">
+                        <td>Trou 1</td>
+                        <td><input type="number" name="holeFrequency" id="freq1" value="329.63" step="any" required>
+                        </td>
+                        <td><input type="text" name="holeDiameter" id="diam1" min="0.2" value="1/4" step="any" required></td>
+                        <td style="display:none"><output name="resultHole" id="result1"></output></td>
+						<td><output id="result1Fraction"></output></td>
+                    </tr>
+                    <!-- End Finger Holes -->
+                    <tr>
+                        <td>Fin de Flute (tous fermés)</td>
+                        <td><input type="number" name="endFrequency" id="endFrequency" value="293.66" step="any"
+                                required></td>
+                        <td>---------</td>
+                        <td><output name="resultEnd" id="resultEnd">0.000</output></td> <!-- Always 0 -->
+                    </tr>
+                </tbody>
+            </table>
+        </fieldset>
+		<div>
+    		<label for="fluteName">
+      		  	 Nom de la flûte :
+    		</label>
+
+    		<input
+       			 type="text"
+        		 id="fluteName">
+		</div>
+		<br>
+		<div>
+ 			<label for="notes">Notes :</label>
+  			<br>
+    		<textarea
+       			 id="notes"
+      			 rows="5"
+        		 cols="80"></textarea>
+		</div>
+		<br>
+		
+
+        <button type="submit" id="calculateButton">🧮&nbsp;Calcul des positions</button>
+		<button type="button" id="saveFluteButton">💾 Enregistrer</button>
+		<button type="button" id="loadFluteButton">📂 Ouvrir</button>
+		<button type="button" id="shareUrlButton">🔗 Partage URL</button>
+		
+		<input
+    		type="file"
+    		id="jsonFileInput"
+    		accept=".json"
+    		style="display:none;"
+		>
+        <button type="button" id="printButton">🖨&nbsp;Imprime image</button>
+		<button type="button" id="reportButton">📋 Imprime Rapport</button>
+        <button type="reset" id="resetButton">🗑&nbsp;Reset par défaut</button>
+
+
+
+
+        <canvas id="renderedFlute" width="800" height="600"></canvas>
+    </form>
+
+    <div id="info">
+        <h2>Notes & Hypothèses</h2>
+        <ul>
+            <li>Calculé sur la base du modèle accoustique 1D (Benade et al.). Trou cylindrique assumé.</li>
+            <li>Les distances sont calculées à partir du bout physique ouvert de la flûte.</li>
+            <li>La vitesse du son est ajustée par rapport à la temperature.</li>
+            <li>La correction d'embouchure utilise les placements empiriques de Kosel. Le placement du bouchon en relation avec le centre de l'embouchure est typiquement 1-1.5x le diamètre de l'embouchure *en direction du bout fermé*.</li>
+            <li>La précision du modèle décroit à plus haute fréquence (approchant la fréquence "cutoff" du trou).</li>
+            <li>Le script requière une flûte à 6 trous.</li>
+        </ul>
+    </div>
+
+    <script src="flutomat.js"></script>
+</body>
+
+</html>
