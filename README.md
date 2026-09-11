@@ -27,6 +27,7 @@ Ce projet est une modernisation et une extension du calculateur original **Fluto
 
 - Version originale archivée :  
   [http://web.archive.org/web/20110611151055/http://www.cwo.com/\~ph_kosel/flutomat.html](http://web.archive.org/web/20110611151055/http://www.cwo.com/\~ph_kosel/flutomat.html)
+- Version sur laquelle Flutomat-Francais s'est grandement inspirée: https://github.com/unityrobot/Flutomat
 
 Les calculs acoustiques sont basés sur les travaux d’**Arthur H. Benade** (*Fundamentals of Musical Acoustics*).
 
