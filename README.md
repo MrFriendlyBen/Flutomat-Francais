@@ -1,6 +1,7 @@
 # Flutomat NG - Calculateur de Flûte
 
-Calculateur en ligne pour déterminer les positions de l’embouchure et des trous d’une flûte traversière à alésage cylindrique. Sur https://mrfriendlyben.github.io/Flutomat-Francais/
+Calculateur en ligne pour déterminer les positions de l’embouchure et des trous d’une flûte traversière à alésage cylindrique. 
+Version en ligne: https://mrfriendlyben.github.io/Flutomat-Francais/
 
 ## Fonctionnalités
 
