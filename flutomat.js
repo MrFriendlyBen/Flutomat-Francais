@@ -1534,6 +1534,7 @@ decimalToFraction32(value){
     }
 }
 
+
 // --- Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
     // Add polyfill for Number.isNaN if needed for older browsers
