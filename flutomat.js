@@ -856,23 +856,43 @@ updateFrequenciesFromKey() {
         context.lineWidth = 1;
 
         // Small arcs under the flute's shape, as indicators
-        {
-            const numberOfArcs = 100;
+        //{
+        //    const numberOfArcs = 100;
 
-            context.strokeStyle = '#dddddd';
+        //    context.strokeStyle = '#dddddd';
             // context.strokeStyle = 'red';
 
-            for (let i = 1; i <= numberOfArcs; i++) {
-                const arcX = maxCorkLength * 1.5 + Math.floor(i * (displayFluteLength) / numberOfArcs);
-                context.beginPath();
-                context.arc(arcX, centerFluteY, displayBoreDiameter / 2, Math.PI * 0.5, Math.PI * 1.5);
-                context.stroke();
-            }
-        }
+        //    for (let i = 1; i <= numberOfArcs; i++) {
+        //        const arcX = maxCorkLength * 1.5 + Math.floor(i * (displayFluteLength) / numberOfArcs);
+        //        context.beginPath();
+        //        context.arc(arcX, centerFluteY, displayBoreDiameter / 2, Math.PI * 0.5, Math.PI * 1.5);
+        //        context.stroke();
+        //    }
+        //}
+        
 
         // Draw flute's outer shape
         {
-            context.strokeStyle = 'black';
+            context.strokeStyle = '#5d4037';
+            
+            // Dégradé intérieur du tube
+            const boreGradient = context.createLinearGradient(
+                0, 
+                fluteMarginY + displayWallThickness, 
+                0, 
+                fluteMarginY + displayWallThickness + displayBoreDiameter
+            );
+            boreGradient.addColorStop(0, '#5d4037');      // foncé en haut
+            boreGradient.addColorStop(0.5, '#d7ccc8');    // clair au milieu
+            boreGradient.addColorStop(1, '#5d4037');      // foncé en bas
+
+            context.fillStyle = boreGradient;
+            context.fillRect(
+                fluteEndX - displayFluteLength, 
+                fluteMarginY + displayWallThickness, 
+                displayFluteLength, 
+                displayBoreDiameter
+            );
 
             // Top flute line
             context.fillRect(fluteEndX - displayFluteLength, fluteMarginY, displayFluteLength, displayWallThickness);
