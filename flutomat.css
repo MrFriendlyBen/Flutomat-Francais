@@ -200,3 +200,39 @@ td input[type="text"] {
 #temperature {
     width: 65px;
 }
+
+/* Bouton contact avec logo */
+.btn-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(to bottom, #6d4c41, #4e342e);
+    color: #f5e8d3;
+    border: 1px solid #8d6e63;
+    border-radius: 8px;
+    padding: 9px 14px;
+    font-weight: 600;
+    text-decoration: none;
+    box-shadow: 
+        0 3px 6px rgba(0,0,0,0.4),
+        inset 0 1px 0 rgba(255,255,255,0.1);
+    transition: all 0.15s ease;
+    margin: 4px;
+    cursor: pointer;
+}
+
+.btn-logo:hover {
+    background: linear-gradient(to bottom, #8d6e63, #5d4037);
+    transform: translateY(-1px);
+    box-shadow: 0 5px 10px rgba(0,0,0,0.5);
+    color: #f5e8d3;
+}
+
+.btn-logo-img {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    border-radius: 50%;
+    background: #f5e8d3;
+    padding: 2px;
+}

@@ -4,12 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flutomat NG - Calculateur de flute moderne</title>
+    <title>Flutomat-Calculateur de flûte</title>
     <link rel="stylesheet" href="flutomat.css">
 </head>
 
 <body>
-    <h1>Flutomat NG - Calculateur de flûte</h1>
+    <h1>Flutomat - Calculateur de flûte traversière</h1>
+
+    
 
     <form id="fluteForm">
         <fieldset>
@@ -49,7 +51,7 @@
 
         <fieldset>
             <legend>Tonalité & Dimensions des trous</legend>
-            <p>Choisir la tonalité ou entrez les fréquences manuellement. Les diamètres sont requis. Si un trou est trop petit il apparaît en rouge et le calcul ne se fait pas. Agrandir alors le diamètre. Après chaque changement appuyez sur le bouton "Calcul des positions"</p>
+            <p>Choisir la tonalité ou entrez les fréquences manuellement. Les diamètres sont requis.</p>
             <div>
                 <label for="keySelector">Tonalité:</label>
                 <select id="keySelector">
@@ -241,6 +243,10 @@
         <button type="button" id="printButton">🖨&nbsp;Imprime image</button>
 		<button type="button" id="reportButton">📋 Imprime Rapport</button>
         <button type="reset" id="resetButton">🗑&nbsp;Reset par défaut</button>
+        <a href="mailto:MrFriendlyBen@gmail.com" class="btn-logo">
+            <img src="Metta3.jpg" alt="Logo" class="btn-logo-img">
+            @MrFriendlyBen
+        </a>
 
 
 
@@ -256,6 +262,7 @@
             <li>La vitesse du son est ajustée par rapport à la temperature.</li>
             <li>La correction d'embouchure utilise les placements empiriques de Kosel. Le placement du bouchon en relation avec le centre de l'embouchure est typiquement 1-1.5x le diamètre de l'embouchure *en direction du bout fermé*.</li>
             <li>La précision du modèle décroit à plus haute fréquence (approchant la fréquence "cutoff" du trou).</li>
+            <li>Code source: https://github.com/MrFriendlyBen/Flutomat-Francais</li>
         </ul>
     </div>
 
