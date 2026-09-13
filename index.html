@@ -15,10 +15,10 @@
         <fieldset>
             <legend>Paramètres Globaux</legend>
             <div>
-                 <label for="units">Unités:</label>
-                <!-- <input type="radio" name="units" value="cm" id="unitsCm"> <label for="unitsCm">cm</label> -->
+                 <label for="units">Unités: Pouces</label>
+                <!-- <input type="radio" name="units" value="cm" id="unitsCm"> <label for="unitsCm">cm</label>
                 <input type="radio" name="units" value="inches" id="unitsInches" checked> <label
-                    for="unitsInches">Pouces</label>
+                    for="unitsInches">Pouces</label>-->
             </div>
             <div>
                 <label for="temperature">Température:</label>
@@ -29,7 +29,7 @@
                 </select>
                 <span id="speedOfSoundDisplay"></span>
 				<div>
-    				<label for="a4Frequency">Référence A4(Hz):</label>
+    				<label for="a4Frequency">Référence LA(Hz):</label>
     				<input type="number" id="a4Frequency" value="440" min="400" max="480" step="0.1">
 			</div>
             </div>
@@ -42,19 +42,19 @@
                 <input type="text" name="boreDiameter" id="boreDiameter" min="0.01" value="3/4" step="any" required>
             </div>
             <div>
-                <label for="wallThickness">Épaisseur du mur:</label>
+                <label for="wallThickness">Épaisseur de la paroi:</label>
                 <input type="text" name="wallThickness" id="wallThickness" value="1/8" required>
             </div>
         </fieldset>
 
         <fieldset>
-            <legend>Fréquence visée & Dimensions des trous</legend>
+            <legend>Tonalité & Dimensions des trous</legend>
             <p>Choisir la tonalité ou entrez les fréquences manuellement. Les diamètres sont requis.</p>
             <div>
                 <label for="keySelector">Tonalité:</label>
                 <select id="keySelector">
                     <option value="73">B5</option>
-                    <option value="72">C5/B#5</option>
+                    <option value="72">C5</option>
                     <option value="71">B4</option>
                     <option value="70">A#4/Bb4</option>
                     <option value="69">A4</option>
@@ -115,8 +115,9 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Type de trou</th>
-                        <th>Frequence cible (Hz)</th>
+                        <th>Trous</th>
+                        <th>Note</th>
+                        <th>Fréquence (Hz)</th>
                         <th>Diamètre</th>
                         <th>Distance</th>
 						<!-- <th>Distance (Fraction)</th> -->
@@ -125,6 +126,7 @@
                 <tbody>
                     <tr>
                         <td>Embouchure</td>
+                        <td>—</td>
                         <td>---------</td>
                         <td><input type="text" name="embouchureDiameter" id="embouchureDiameter" min="0.2" value="3/8"
                                 step="any" required></td>
@@ -139,7 +141,8 @@
                     <!-- Finger Holes (Generate dynamically or list explicitly) -->
                     <!-- Example for 6 holes -->
                     <tr class="hole-row" data-hole-index="5">
-                        <td>Trou 6 (tous ouverts)</td>
+                        <td>Trou 6</td>
+                        <td><output id="note6"></output></td>
                         <td><input type="number" name="holeFrequency" id="freq6" value="554.37" step="any" required>
                         </td>
                         <td><input type="text" name="holeDiameter" id="diam6" min="0.2" value="3/8" step="any" required></td>
@@ -148,6 +151,7 @@
                     </tr>
                     <tr class="hole-row" data-hole-index="4">
                         <td>Trou 5</td>
+                        <td><output id="note5"></output></td>
                         <td><input type="number" name="holeFrequency" id="freq5" value="493.88" step="any" required>
                         </td>
                         <td><input type="text" name="holeDiameter" id="diam5" min="0.2" value="3/8" step="any" required></td>
@@ -156,6 +160,7 @@
                     </tr>
                     <tr class="hole-row" data-hole-index="3">
                         <td>Trou 4</td>
+                        <td><output id="note4"></output></td>
                         <td><input type="number" name="holeFrequency" id="freq4" value="440.00" step="any" required>
                         </td>
                         <td><input type="text" name="holeDiameter" id="diam4" min="0.2" value="5/16" step="any" required></td>
@@ -164,6 +169,7 @@
                     </tr>
                     <tr class="hole-row" data-hole-index="2">
                         <td>Trou 3</td>
+                        <td><output id="note3"></output></td>
                         <td><input type="number" name="holeFrequency" id="freq3" value="392.00" step="any" required>
                         </td>
                         <td><input type="text" name="holeDiameter" id="diam3" min="0.2" value="5/16" step="any" required></td>
@@ -172,6 +178,7 @@
                     </tr>
                     <tr class="hole-row" data-hole-index="1">
                         <td>Trou 2</td>
+                        <td><output id="note2"></output></td>
                         <td><input type="number" name="holeFrequency" id="freq2" value="369.99" step="any" required>
                         </td>
                         <td><input type="text" name="holeDiameter" id="diam2" min="0.2" value="7/16" step="any" required></td>
@@ -180,6 +187,7 @@
                     </tr>
                     <tr class="hole-row" data-hole-index="0">
                         <td>Trou 1</td>
+                        <td><output id="note1"></output></td>
                         <td><input type="number" name="holeFrequency" id="freq1" value="329.63" step="any" required>
                         </td>
                         <td><input type="text" name="holeDiameter" id="diam1" min="0.2" value="1/4" step="any" required></td>
@@ -188,7 +196,8 @@
                     </tr>
                     <!-- End Finger Holes -->
                     <tr>
-                        <td>Fin de Flute (tous fermés)</td>
+                        <td>Tous fermés</td>
+                        <td><output id="noteEnd"></output></td>
                         <td><input type="number" name="endFrequency" id="endFrequency" value="293.66" step="any"
                                 required></td>
                         <td>---------</td>
@@ -246,7 +255,7 @@
             <li>Les distances sont calculées à partir du bout physique ouvert de la flûte.</li>
             <li>La vitesse du son est ajustée par rapport à la temperature.</li>
             <li>La correction d'embouchure utilise les placements empiriques de Kosel. Le placement du bouchon en relation avec le centre de l'embouchure est typiquement 1-1.5x le diamètre de l'embouchure *en direction du bout fermé*.</li>
-            <li>La précision du modèle décroit à plus haute fréquence (approchant la fréquence "cutoff" du trou).</li>            
+            <li>La précision du modèle décroit à plus haute fréquence (approchant la fréquence "cutoff" du trou).</li>
         </ul>
     </div>
 

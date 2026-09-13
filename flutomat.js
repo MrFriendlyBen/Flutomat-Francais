@@ -156,7 +156,7 @@ class FluteCalculator {
      */
     _bindEvents() {
         this.form.addEventListener('submit', (e) => {
-            e.preventDefault(); // Prevent actual form submission
+            e.preventDefault();
             this.calculateAllPositions();
         });
 
@@ -176,14 +176,19 @@ class FluteCalculator {
 
             // Frequency checks
             this.holeFrequencyInputs[index].addEventListener('change', (e) => {
-                const value = Number(e.target.value);
+                    const value = Number(e.target.value);
                 if (value <= 65.41) {
-                    e.target.value = 65.41; // Seriously, no flute can ever do lower than C2, except some bass flutes
+                    e.target.value = 65.41;
                 }
                 if (value >= 2637) {
-                    e.target.value = 2637; // Same here, hard to expect anything higher than E7
+                    e.target.value = 2637;
                 }
-                this.calculateAllPositions();
+            this.calculateAllPositions();
+
+                const noteEl = document.getElementById(`note${index + 1}`);
+                if (noteEl) {
+                    noteEl.value = this.frequencyToNoteName(Number(e.target.value));
+                }
             });
 
             // Diameters checks
@@ -262,13 +267,14 @@ class FluteCalculator {
     /** Handles changes in the unit selection. */
     _handleUnitChange() {
         this.readUnitsInput();
+        this.calculateSpeedOfSound();
         this.updateSpeedOfSoundDisplay();
         this.updateUnitsBasedInputs();
         // Potentially convert existing values if needed, or require re-input/recalc
         this.clearResults(); // Clear old results as they are likely invalid
     }
 
-    updateUnitsBasedInputs() {
+    /** updateUnitsBasedInputs() {
         const isCm = this.units === 'cm';
         const ratio = (isCm ? (1 / this.CM_TO_INCH) : this.CM_TO_INCH);
         const digits = isCm ? 2 : 3;
@@ -277,6 +283,31 @@ class FluteCalculator {
         this.embouchureDiameterInput.value = (Number(this.embouchureDiameterInput.value) * ratio).toFixed(digits);
         for (let i = 0; i < this.HOLE_COUNT; i++) {
             this.holeDiameterInputs[i].value = (Number(this.holeDiameterInputs[i].value) * ratio).toFixed(digits);
+        }
+    } */
+    
+    updateUnitsBasedInputs() {
+        const isCm = this.units === 'cm';
+        const ratio = isCm ? (1 / this.CM_TO_INCH) : this.CM_TO_INCH;
+
+        // Fonction locale pour formater selon l'unité
+            const formatValue = (val) => {
+            const num = this.parseFraction(val) * ratio;
+            if (isCm) {
+                // En cm → décimal avec 2 chiffres
+                return num.toFixed(2);
+            } else {
+                // En pouces → fraction
+                return this.decimalToFraction32(num).replace('"', '');
+            }
+        };
+
+        this.wallThicknessInput.value = formatValue(this.wallThicknessInput.value);
+        this.boreDiameterInput.value = formatValue(this.boreDiameterInput.value);
+        this.embouchureDiameterInput.value = formatValue(this.embouchureDiameterInput.value);
+
+        for (let i = 0; i < this.HOLE_COUNT; i++) {
+            this.holeDiameterInputs[i].value = formatValue(this.holeDiameterInputs[i].value);
         }
     }
 
@@ -411,6 +442,17 @@ class FluteCalculator {
             this.speedOfSoundDisplay.textContent = "Speed of Sound: Calculation Error";
         }
     }
+    
+    frequencyToNoteName(freq) {
+        if (!freq || isNaN(freq) || freq <= 0) return "—";
+
+        const noteNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+        const midi = Math.round(12 * Math.log2(freq / this.A4_FREQUENCY_HZ) + 69);
+        const name = noteNames[midi % 12];
+        const octave = Math.floor(midi / 12) - 1;
+
+        return name + octave;
+    }
 
 
     /**
@@ -452,7 +494,20 @@ updateFrequenciesFromKey() {
 
     this.updateVisibleHoles();
 
-    // On ne lance PAS le calcul ici → plus de popup pendant la saisie
+    // Afficher les noms de notes
+    for (let i = 0; i < this.HOLE_COUNT; i++) {
+            const noteEl = document.getElementById(`note${i + 1}`);
+        if (noteEl) {
+            const freq = parseFloat(this.holeFrequencyInputs[i].value);
+            noteEl.value = this.frequencyToNoteName(freq);
+        }
+        // Note de base (fin de flûte)
+            const noteEndEl = document.getElementById('noteEnd');
+        if (noteEndEl) {
+            const baseFreq = parseFloat(this.endFrequencyInput.value);
+            noteEndEl.value = this.frequencyToNoteName(baseFreq);
+        }
+    }
 }
     // --- Acoustic Calculation Functions (Ported and Renamed) ---
 
@@ -808,6 +863,8 @@ updateFrequenciesFromKey() {
             }
         }
     }
+    
+    
 
     clearFluteImage() {
         const canvas = this.renderedFluteElement;
@@ -1172,13 +1229,15 @@ updateFrequenciesFromKey() {
     let holeTable = "";
     // Boucle inversée : 6 en haut → 1 en bas
     for (let i = this.activeHoleCount - 1; i >= 0; i--) {
+        const note = this.frequencyToNoteName(parseFloat(this.holeFrequencyInputs[i].value));
         holeTable += `
         <tr>
             <td>${i + 1}</td>
+            <td>${note}</td>
             <td>${this.holeFrequencyInputs[i].value}</td>
             <td>${this.holeDiameterInputs[i].value}</td>
             <td>${this.decimalToFraction32(Number(this.holeResultOutputs[i].value))}</td>
-        </tr>
+            </tr>
         `;
     }
 
@@ -1276,6 +1335,7 @@ ${notes}
 
 <tr>
 <th>Trou</th>
+<th>Note</th>
 <th>Fréquence</th>
 <th>Diamètre</th>
 <th>Position</th>
@@ -1533,7 +1593,6 @@ decimalToFraction32(value){
         });
     }
 }
-
 
 // --- Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
