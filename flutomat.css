@@ -195,3 +195,8 @@ td input[type="text"] {
     width: 65px;
     margin-right: 0;
 }
+
+/* Largeur du champ Température */
+#temperature {
+    width: 65px;
+}
