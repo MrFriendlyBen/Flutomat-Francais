@@ -220,9 +220,31 @@ class FluteCalculator {
         });
         // Force all diameters to be errored if bore diameter is bigger than holes diameters.
         this.boreDiameterInput.addEventListener('change', (e) => {
-            this.boreDiameter = Number(isNaN(e.target.value) ? 1 : e.target.value); // Reset to 1 if invalid
-            this.embouchureDiameterInput.value = Number(this.embouchureDiameterInput.value) >= this.boreDiameter ? (this.boreDiameter - this.wallThickness) : this.embouchureDiameterInput.value;
-            this.holeDiameterInputs.forEach(holeDiameterInput => holeDiameterInput.value = Number(holeDiameterInput.value) >= this.boreDiameter ? (this.boreDiameter - this.wallThickness) : Number(holeDiameterInput.value));
+            // Lecture correcte avec le parseur de fractions
+            const newBore = this.parseFraction(e.target.value);
+            if (isNaN(newBore) || newBore <= 0) {
+                e.target.style.borderColor = 'red';
+                return;
+            }
+            e.target.style.borderColor = '';
+            this.boreDiameter = newBore;
+
+            const wall = this.parseFraction(this.wallThicknessInput.value) || 0;
+
+            // Embouchure
+            const embVal = this.parseFraction(this.embouchureDiameterInput.value);
+            if (!isNaN(embVal) && embVal >= this.boreDiameter) {
+                this.embouchureDiameterInput.value = this.decimalToFraction32(this.boreDiameter - wall).replace('"', '');
+            }
+
+            // Trous
+            this.holeDiameterInputs.forEach(input => {
+                const diam = this.parseFraction(input.value);
+                if (!isNaN(diam) && diam >= this.boreDiameter) {
+                    input.value = this.decimalToFraction32(this.boreDiameter - wall).replace('"', '');
+                }
+            });
+
             this.calculateAllPositions();
         });
 
@@ -541,6 +563,86 @@ updateFrequenciesFromKey() {
         const diameter = this.holes[holeIndex]?.diameter;
         if (isNaN(this.wallThickness) || isNaN(diameter)) return NaN;
         return this.wallThickness + this.HOLE_HEIGHT_EXTENSION_FACTOR * diameter;
+    }
+    /**
+     * Calcule la fréquence de coupure locale (Benade) pour un trou.
+     * @param {number} holeIndex - index 0-based
+     * @returns {number} fc en Hz
+     */
+    calculateCutoffFrequency(holeIndex) {
+        if (holeIndex >= this.activeHoleCount || isNaN(this.speedOfSound)) return NaN;
+
+        const hole = this.holes[holeIndex];
+        if (!hole || isNaN(hole.diameter) || hole.diameter <= 0) return NaN;
+
+        const a = this.boreDiameter / 2;          // rayon du tube
+        const b = hole.diameter / 2;             // rayon du trou
+        const te = this.calculateEffectiveHoleHeight(holeIndex);
+
+        // Espacement s = demi-distance au trou suivant (ou à l'extrémité)
+        let spacing;
+        if (holeIndex + 1 < this.activeHoleCount) {
+            const dist = this.holes[holeIndex].physicalPosition - this.holes[holeIndex + 1].physicalPosition;
+            spacing = Math.abs(dist) / 2;
+        } else {
+            spacing = this.holes[holeIndex].physicalPosition / 2;
+        }
+
+        if (spacing <= 0 || te <= 0 || a <= 0) return NaN;
+
+        // Formule classique de Benade
+        return 0.11 * this.speedOfSound * (b / a) / Math.sqrt(spacing * te);
+    }
+
+    /**
+     * Colore uniquement la cellule "Distance" de chaque trou
+     * selon le ratio fc / (2 × fréquence)
+     */
+    colorHoleCellsByCutoff() {
+        // Couleurs pastel qui restent lisibles sur fond bois sombre
+        const colors = [
+            { max: 1.10, color: '#ffeb36' }, // Jaune - bas
+            { max: 1.35, color: '#c0ca33' }, // Lime
+            { max: 1.60, color: '#4fb342' }, // Vert Clair
+            { max: 2.10, color: '#2d7e33' }, // Vert – zone idéale
+            { max: 2.50, color: '#008982' }, // Teal
+            { max: Infinity, color: '#4266b3' } // Bleu – haut
+        ];
+
+        for (let i = 0; i < this.HOLE_COUNT; i++) {
+            const row = this.holeRows[i];
+            if (!row) continue;
+
+            // On cible uniquement la dernière cellule visible (Distance / fraction)
+            const cells = row.querySelectorAll('td');
+            const distanceCell = cells[cells.length - 1];
+
+            // Réinitialisation
+            distanceCell.style.backgroundColor = '';
+            distanceCell.title = '';
+
+            if (i >= this.activeHoleCount) continue;
+
+            const freq = this.holes[i]?.frequency;
+            const fc = this.calculateCutoffFrequency(i);
+
+            if (isNaN(freq) || isNaN(fc) || freq <= 0) continue;
+
+            const ratio = fc / (2 * freq);
+
+            let bg = colors[colors.length - 1].color;
+            for (const c of colors) {
+                if (ratio < c.max) {
+                    bg = c.color;
+                    break;
+                }
+            }
+
+            distanceCell.style.backgroundColor = bg;
+            distanceCell.style.color = '#ffffff';          // texte blanc pour contraste
+            distanceCell.style.fontWeight = '600';
+            distanceCell.title = `fc ≈ ${Math.round(fc)} Hz  |  ratio = ${ratio.toFixed(2)}`;
+        }
     }
 
     /**
@@ -862,6 +964,7 @@ updateFrequenciesFromKey() {
 				this.holeFractionOutputs[i].value = this.decimalToFraction32(this.holes[i]?.physicalPosition);
             }
         }
+        this.colorHoleCellsByCutoff();
     }
     
     
@@ -1590,6 +1693,17 @@ decimalToFraction32(value){
         this.resultEndOutput.value = "0.000";
         this.holeResultOutputs.forEach(output => {
             if (output) output.value = "";
+        });
+        this.holeRows.forEach(row => {
+            if (!row) return;
+            const cells = row.querySelectorAll('td');
+            const distanceCell = cells[cells.length - 1];
+            if (distanceCell) {
+                distanceCell.style.backgroundColor = '';
+                distanceCell.style.color = '';
+                distanceCell.style.fontWeight = '';
+                distanceCell.title = '';
+            }
         });
     }
 }
