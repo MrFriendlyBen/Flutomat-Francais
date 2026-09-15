@@ -236,3 +236,57 @@ td input[type="text"] {
     background: #f5e8d3;
     padding: 2px;
 }
+
+/* ===== Responsive : notes + dessin de la flûte ===== */
+
+/* La zone de notes ne doit jamais dépasser */
+#notes {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    resize: vertical;
+}
+
+/* Le canvas s’adapte à la largeur disponible */
+#renderedFlute {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;          /* conserve le ratio */
+    margin: 25px auto 10px;
+    background: #2c1e1a;
+    border: 2px solid #6d4c41;
+    border-radius: 10px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.5);
+}
+
+/* Conteneur principal plus souple sur tablette */
+form {
+    max-width: 920px;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 20px;
+}
+
+/* Sur les écrans plus étroits (tablettes en portrait, etc.) */
+@media (max-width: 900px) {
+    body {
+        padding: 10px;
+    }
+    form {
+        padding: 15px;
+    }
+    #renderedFlute {
+        margin: 15px auto 8px;
+    }
+}
+
+/* Très petits écrans */
+@media (max-width: 600px) {
+    form {
+        padding: 12px;
+    }
+    table {
+        font-size: 0.9em;
+    }
+}
