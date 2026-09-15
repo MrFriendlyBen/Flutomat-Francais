@@ -11,6 +11,7 @@ Version en ligne: https://mrfriendlyben.github.io/Flutomat-Francais/
 - Réglage de la fréquence de référence (A4 = 440 Hz, 432 Hz ou autre)
 - Affichage des distances en fractions (32ᵉ de pouce)
 - Sauvegarde et chargement de configurations
+- Calcul de l'effet d'un wedge de Fajardo sur la position de l'embouchure
 - Impression du schéma et du rapport
 - Interface adaptée au français
 
