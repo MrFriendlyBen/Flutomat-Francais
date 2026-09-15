@@ -47,6 +47,21 @@
                 <label for="wallThickness">Épaisseur de la paroi:</label>
                 <input type="text" name="wallThickness" id="wallThickness" value="1/8" required>
             </div>
+            <div style="margin-top: 12px; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                <label>
+                    <input type="checkbox" id="fajardoWedge">
+                    Activer le wedge de Fajardo
+                </label>
+                <br>
+                <label style="display:block; margin-top:8px;">
+                    Intensité du wedge :
+                    <input type="range" id="wedgeIntensity" min="0" max="100" value="50" style="width:140px; vertical-align:middle;">
+                    <span id="wedgeValue">50 %</span>
+                </label>
+                <small style="display:block; opacity:0.75; margin-top:4px;">
+                    0 % = aucun effet · 50 % = valeur typique · 100 % = effet fort
+                </small>
+            </div>
         </fieldset>
 
         <fieldset>

@@ -78,7 +78,9 @@ class FluteCalculator {
             this.holeResultOutputs[index] = row.querySelector('output[name="resultHole"]');
 			this.holeFractionOutputs[index] = document.getElementById(`result${index+1}Fraction`);
         });
-
+        this.fajardoWedgeCheckbox = document.getElementById('fajardoWedge');
+        this.wedgeIntensityInput = document.getElementById('wedgeIntensity');
+        this.wedgeValueDisplay = document.getElementById('wedgeValue');
         // --- Internal State Variables ---
         /** @type {'cm' | 'inches'} The unit system currently selected. */
         this.units = 'inches';
@@ -276,6 +278,18 @@ class FluteCalculator {
 		//this.importJsonButton.addEventListener('click',()=>this.jsonFileInput.click());
 		this.shareUrlButton.addEventListener('click',()=>this.generateShareUrl());
 		this.jsonFileInput.addEventListener('change',(e)=>this.importJson(e));
+        // === Wedge de Fajardo ===
+        if (this.fajardoWedgeCheckbox) {
+            this.fajardoWedgeCheckbox.addEventListener('change', () => this.calculateAllPositions());
+        }
+        if (this.wedgeIntensityInput) {
+            this.wedgeIntensityInput.addEventListener('input', (e) => {
+                if (this.wedgeValueDisplay) {
+                    this.wedgeValueDisplay.textContent = e.target.value + ' %';
+                }
+                this.calculateAllPositions();
+            });
+        }
     }
 
     /** Handles changes in the temperature input or units. */
@@ -340,42 +354,43 @@ class FluteCalculator {
      * @throws {Error} If at least one input is invalid.
      */
     readInputsFromForm() {
-        const errors = [];
+        const criticalErrors = [];
+        const holeErrors = [];
 
-        this.readUnitsInput(); // Read units first
-        this.readTemperatureInput(); // Read temperature
+        this.readUnitsInput();
+        this.readTemperatureInput();
 
-        const parseAndValidate = (inputElement, propertyName, isPositive = true) => {
+        const parseAndValidate = (inputElement, propertyName, displayName, isPositive = true) => {
             const value = this.parseFraction(inputElement.value);
             if (isNaN(value) || (isPositive && value <= 0)) {
-                inputElement.style.borderColor = 'red'; // Basic validation feedback
-                errors.push(`Invalid value for ${propertyName}: ${inputElement.value}`);
-                this[propertyName] = NaN; // Set internal state to invalid
+                inputElement.style.borderColor = 'red';
+                criticalErrors.push(displayName);
+                this[propertyName] = NaN;
             } else {
-                inputElement.style.borderColor = ''; // Clear error state
+                inputElement.style.borderColor = '';
                 this[propertyName] = value;
             }
         };
 
-        parseAndValidate(this.boreDiameterInput, 'boreDiameter');
-        parseAndValidate(this.wallThicknessInput, 'wallThickness');
-        parseAndValidate(this.embouchureDiameterInput, 'embouchureDiameter');
-        parseAndValidate(this.endFrequencyInput, 'endFrequency');
+        parseAndValidate(this.boreDiameterInput, 'boreDiameter', 'Diamètre intérieur');
+        parseAndValidate(this.wallThicknessInput, 'wallThickness', 'Épaisseur de paroi');
+        parseAndValidate(this.embouchureDiameterInput, 'embouchureDiameter', 'Diamètre embouchure');
+        parseAndValidate(this.endFrequencyInput, 'endFrequency', 'Fréquence de base');
 
-        // Read hole data
+        // --- Trous (erreurs non bloquantes) ---
         this.holes = [];
         for (let i = 0; i < this.activeHoleCount; i++) {
             const freqInput = this.holeFrequencyInputs[i];
             const diamInput = this.holeDiameterInputs[i];
             const freq = parseFloat(freqInput.value);
-            //const diam = parseFloat(diamInput.value);
             const diam = this.parseFraction(diamInput.value);
 
             let holeValid = true;
+
             if (isNaN(freq) || freq <= 0) {
                 freqInput.style.borderColor = 'red';
                 holeValid = false;
-                errors.push(`Invalid frequency for hole ${i + 1}: ${freqInput.value}`);
+                holeErrors.push(`Fréquence du trou ${i + 1}`);
             } else {
                 freqInput.style.borderColor = '';
             }
@@ -383,7 +398,7 @@ class FluteCalculator {
             if (isNaN(diam) || diam <= 0) {
                 diamInput.style.borderColor = 'red';
                 holeValid = false;
-                errors.push(`Invalid diameter for hole ${i + 1}: ${diamInput.value}`);
+                holeErrors.push(`Diamètre du trou ${i + 1}`);
             } else {
                 diamInput.style.borderColor = '';
             }
@@ -396,8 +411,12 @@ class FluteCalculator {
             };
         }
 
-        if (errors.length > 0) {
-            throw new Error("Invalid input detected. Please correct the highlighted fields.\n- "+errors.join("\n- "));
+        // Message discret pour les trous
+        this.showStatusMessage(holeErrors);
+
+        // Seulement les erreurs critiques bloquent vraiment
+        if (criticalErrors.length > 0) {
+            throw new Error("Paramètres globaux invalides : " + criticalErrors.join(', '));
         }
     }
 
@@ -564,6 +583,45 @@ updateFrequenciesFromKey() {
         if (isNaN(this.wallThickness) || isNaN(diameter)) return NaN;
         return this.wallThickness + this.HOLE_HEIGHT_EXTENSION_FACTOR * diameter;
     }
+
+    /**
+     * Affiche un message de statut discret (non bloquant)
+     */
+    showStatusMessage(messages = []) {
+        let msgEl = document.getElementById('statusMessage');
+        if (!msgEl) {
+            msgEl = document.createElement('div');
+            msgEl.id = 'statusMessage';
+            msgEl.style.cssText = `
+                margin: 14px 0;
+                padding: 11px 15px;
+                border-radius: 8px;
+                font-size: 0.93em;
+                display: none;
+                line-height: 1.4;
+            `;
+            const table = document.querySelector('table');
+            if (table) {
+                table.parentNode.insertBefore(msgEl, table);
+            }
+        }
+
+        if (!messages || messages.length === 0) {
+            msgEl.style.display = 'none';
+            msgEl.innerHTML = '';
+            return;
+        }
+
+        msgEl.style.display = 'block';
+        msgEl.style.background = 'rgba(183, 28, 28, 0.18)';
+        msgEl.style.border = '1px solid #c62828';
+        msgEl.style.color = '#ffcdd2';
+        msgEl.innerHTML = `
+            <strong>Attention :</strong> ${messages.join(' • ')}.<br>
+            <span style="opacity:0.9">Corrigez les cases en rouge. Les autres trous sont calculés normalement.</span>
+        `;
+    }
+
     /**
      * Calcule la fréquence de coupure locale (Benade) pour un trou.
      * @param {number} holeIndex - index 0-based
@@ -744,11 +802,33 @@ updateFrequenciesFromKey() {
             this.embouchureDiameter === 0 || (this.boreDiameter + 2 * this.wallThickness) === 0) {
             return NaN;
         }
+
         const bore_demb_ratio_sq = (this.boreDiameter / this.embouchureDiameter) * (this.boreDiameter / this.embouchureDiameter);
         const numerator = 10.84 * this.wallThickness * this.embouchureDiameter;
         const denominator = this.boreDiameter + 2.0 * this.wallThickness;
 
-        return bore_demb_ratio_sq * numerator / denominator;
+        let embouchureCorrection = bore_demb_ratio_sq * numerator / denominator;
+
+        // Application du wedge de Fajardo (si activé)
+        const wedgeFactor = this.getFajardoWedgeFactor();
+        embouchureCorrection *= wedgeFactor;
+
+        return embouchureCorrection;
+    }
+
+    /**
+     * Facteur d'ajustement dû au wedge de Fajardo.
+     * Approximation empirique : le wedge raccourcit légèrement
+     * la correction d'embouchure (améliore surtout le 2e octave).
+     * @returns {number} multiplicateur (1.0 = aucun effet)
+     */
+    getFajardoWedgeFactor() {
+        if (!this.fajardoWedgeCheckbox || !this.fajardoWedgeCheckbox.checked) {
+            return 1.0;
+        }
+        const intensity = (this.wedgeIntensityInput ? Number(this.wedgeIntensityInput.value) : 50) / 100;
+        // Réduction maximale d'environ 8 % de la correction à intensité 100 %
+        return 1.0 - (0.08 * intensity);
     }
 
     /**
@@ -930,19 +1010,20 @@ updateFrequenciesFromKey() {
      */
     calculateAllPositions() {
         console.log("calculateAllPositions()");
-        console.log(
-            "activeHoleCount = ",
-            this.activeHoleCount
-        );
+        console.log("activeHoleCount = ", this.activeHoleCount);
 
         try {
-            this.readInputsFromForm(); // Ensure inputs are valid first
-            this.calculateHolePositions_Quadratic();
-            console.log(this.holes);
+            this.readInputsFromForm();
+            const success = this.calculateHolePositions_Quadratic();
             this.displayResultsInForm();
             this.renderFluteImage();
+
+            if (!success) {
+                // Le message est déjà géré par showStatusMessage
+            }
         } catch (e) {
-            alert("Calculation failed:\n"+e.message);
+            // Erreurs critiques seulement
+            this.showStatusMessage([e.message]);
             this.clearResults();
             this.clearFluteImage();
         }
@@ -952,18 +1033,24 @@ updateFrequenciesFromKey() {
      * Displays the calculated physical positions in the output fields.
      */
     displayResultsInForm() {
-        const format = (value) => isNaN(value) ? "Error" : value.toFixed(3);
+        const format = (value) => isNaN(value) ? "—" : value.toFixed(3);
 
         this.resultEmbouchureOutput.value = format(this.embouchurePhysicalPosition);
-		this.resultEmbouchureFractionOutput.value = this.decimalToFraction32(this.embouchurePhysicalPosition);
-        this.resultEndOutput.value = "0.000"; // By definition
+        this.resultEmbouchureFractionOutput.value = isNaN(this.embouchurePhysicalPosition)
+            ? "—"
+            : this.decimalToFraction32(this.embouchurePhysicalPosition);
+        this.resultEndOutput.value = "0.000";
 
         for (let i = 0; i < this.HOLE_COUNT; i++) {
             if (this.holeResultOutputs[i]) {
-                this.holeResultOutputs[i].value = format(this.holes[i]?.physicalPosition);
-				this.holeFractionOutputs[i].value = this.decimalToFraction32(this.holes[i]?.physicalPosition);
+                const pos = this.holes[i]?.physicalPosition;
+                this.holeResultOutputs[i].value = format(pos);
+                this.holeFractionOutputs[i].value = isNaN(pos)
+                    ? "—"
+                    : this.decimalToFraction32(pos);
             }
         }
+
         this.colorHoleCellsByCutoff();
     }
     
@@ -1687,6 +1774,19 @@ decimalToFraction32(value){
 	return `${whole} ${numerator}/${denominator}"`;
 }
 
+/**
+ * Facteur d'ajustement dû au wedge de Fajardo.
+ * Approximation empirique.
+ */
+getFajardoWedgeFactor() {
+    if (!this.fajardoWedgeCheckbox || !this.fajardoWedgeCheckbox.checked) {
+        return 1.0;
+    }
+    const intensity = (this.wedgeIntensityInput ? Number(this.wedgeIntensityInput.value) : 50) / 100;
+    // Réduction maximale d'environ 8 % à 100 %
+    return 1.0 - (0.08 * intensity);
+}
+
     /** Clears all result output fields. */
     clearResults() {
         this.resultEmbouchureOutput.value = "";
@@ -1694,6 +1794,8 @@ decimalToFraction32(value){
         this.holeResultOutputs.forEach(output => {
             if (output) output.value = "";
         });
+
+        // Nettoyage des couleurs des cellules
         this.holeRows.forEach(row => {
             if (!row) return;
             const cells = row.querySelectorAll('td');
@@ -1705,6 +1807,11 @@ decimalToFraction32(value){
                 distanceCell.title = '';
             }
         });
+
+        // Cache le message d’erreur
+        if (typeof this.showStatusMessage === 'function') {
+            this.showStatusMessage([]);
+        }
     }
 }
 
