@@ -4,6 +4,7 @@
  * acoustic principles, incorporating temperature-dependent speed of sound.
  */
 
+
 /**
  * Represents and calculates flute dimensions.
  * @class
