@@ -4,7 +4,6 @@
  * acoustic principles, incorporating temperature-dependent speed of sound.
  */
 
-
 /**
  * Represents and calculates flute dimensions.
  * @class
@@ -832,6 +831,65 @@ updateFrequenciesFromKey() {
         return 1.0 - (0.08 * intensity);
     }
 
+    updateHarmonicGauges() {
+        // Angles en degrés pour un demi-cercle supérieur
+        // -180° = gauche, -90° = haut, 0° = droite
+        const angles = [-180, -150, -120, -90, -60, -30, 0];
+
+        for (let i = 0; i < this.activeHoleCount; i++) {
+            const row = this.holeRows[i];
+            if (!row) continue;
+
+            const gauge = row.querySelector('.harmonic-gauge');
+            const needle = row.querySelector('.needle');
+            if (!gauge || !needle) continue;
+
+            const ratio = this.getCutoffRatio(i);
+            let position = 4;
+
+            if (!isNaN(ratio)) {
+                if (ratio < 1.25) position = 1;
+                else if (ratio < 1.40) position = 2;
+                else if (ratio < 1.55) position = 3;
+                else if (ratio < 1.90) position = 4;
+                else if (ratio < 2.15) position = 5;
+                else if (ratio < 2.40) position = 6;
+                else position = 7;
+            }
+
+            const angleDeg = angles[position - 1];
+            const angleRad = angleDeg * Math.PI / 180;
+
+            // Longueur de l'aiguille (du centre au bout)
+            const length = 20;
+            const x2 = 30 + length * Math.cos(angleRad);
+            const y2 = 30 + length * Math.sin(angleRad);
+
+            // On positionne directement les extrémités de l'aiguille
+            needle.setAttribute('x1', 30);
+            needle.setAttribute('y1', 30);
+            needle.setAttribute('x2', x2);
+            needle.setAttribute('y2', y2);
+            needle.removeAttribute('transform'); // plus de rotation
+
+            gauge.dataset.position = position;
+            gauge.title = `Ratio fc/2f = ${isNaN(ratio) ? '—' : ratio.toFixed(2)} → pos. ${position}`;
+        }
+    }
+
+    /**
+     * Calcule le ratio fc / (2f) pour un trou
+     */
+    getCutoffRatio(holeIndex) {
+        const hole = this.holes[holeIndex];
+        if (!hole || isNaN(hole.frequency) || hole.frequency <= 0) return NaN;
+
+        const fc = this.calculateCutoffFrequency(holeIndex);
+        if (isNaN(fc) || fc <= 0) return NaN;
+
+        return fc / (2 * hole.frequency);
+    }
+
     /**
      * Calculates all hole positions using the non-iterative quadratic solution method.
      * Based on Benade's equations after algebraic manipulation.
@@ -1051,8 +1109,8 @@ updateFrequenciesFromKey() {
                     : this.decimalToFraction32(pos);
             }
         }
+        this.updateHarmonicGauges();
 
-        this.colorHoleCellsByCutoff();
     }
     
     
@@ -1775,18 +1833,6 @@ decimalToFraction32(value){
 	return `${whole} ${numerator}/${denominator}"`;
 }
 
-/**
- * Facteur d'ajustement dû au wedge de Fajardo.
- * Approximation empirique.
- */
-getFajardoWedgeFactor() {
-    if (!this.fajardoWedgeCheckbox || !this.fajardoWedgeCheckbox.checked) {
-        return 1.0;
-    }
-    const intensity = (this.wedgeIntensityInput ? Number(this.wedgeIntensityInput.value) : 50) / 100;
-    // Réduction maximale d'environ 8 % à 100 %
-    return 1.0 - (0.08 * intensity);
-}
 
     /** Clears all result output fields. */
     clearResults() {

@@ -145,6 +145,7 @@
                         <th>Fréquence (Hz)</th>
                         <th>Diamètre</th>
                         <th>Distance</th>
+                        <th style="width:70px;">2<sup>e</sup> oct.</th>
 						<!-- <th>Distance (Fraction)</th> -->
                     </tr>
                 </thead>
@@ -173,6 +174,34 @@
                         <td><input type="text" name="holeDiameter" id="diam6" min="0.2" value="3/8" step="any" required></td>
                         <td style="display:none"><output name="resultHole" id="result6"></output></td>
 						<td><output id="result6Fraction"></output></td>
+                        <td class="gauge-cell">
+                            <div class="harmonic-gauge" data-position="4">
+                                <svg viewBox="0 0 60 60" width="54" height="54">
+                                    <!-- Fond du cadran -->
+                                    <circle cx="30" cy="30" r="28" fill="#2c1e1a" stroke="#6d4c41" stroke-width="2"/>
+                                    
+                                    <!-- Bande de couleur (arc 270°) -->
+                                    <path class="color-band" d="M 8,30 A 22,22 0 0,1 52,30" 
+                                        fill="none" stroke="url(#gaugeGradient5)" stroke-width="6" stroke-linecap="round"/>
+                                    
+                                    <!-- Définition du dégradé jaune → vert → rouge -->
+                                    <defs>
+                                        <linearGradient id="gaugeGradient5" x1="0%" y1="0%" x2="100%" y2="0%">
+                                            <stop offset="0%" stop-color="#f9a825"/>   <!-- Jaune -->
+                                            <stop offset="50%" stop-color="#43a047"/>  <!-- Vert -->
+                                            <stop offset="100%" stop-color="#c62828"/> <!-- Rouge -->
+                                        </linearGradient>
+                                    </defs>
+
+                                    <!-- Aiguille -->
+                                    <line class="needle" x1="30" y1="30" x2="30" y2="10" 
+                                        stroke="#efd9b8" stroke-width="2.5" stroke-linecap="round"/>
+                                    
+                                    <!-- Centre (pivot) -->
+                                    <circle cx="30" cy="30" r="3.5" fill="#a1887f" stroke="#5d4037" stroke-width="1"/>
+                                </svg>
+                            </div>
+                        </td>
                     </tr>
                     <tr class="hole-row" data-hole-index="4">
                         <td>Trou 5</td>
@@ -182,6 +211,34 @@
                         <td><input type="text" name="holeDiameter" id="diam5" min="0.2" value="3/8" step="any" required></td>
                         <td style="display:none"><output name="resultHole" id="result5"></output></td>
 						<td><output id="result5Fraction"></output></td>
+                        <td class="gauge-cell">
+                            <div class="harmonic-gauge" data-position="4">
+                                <svg viewBox="0 0 60 60" width="54" height="54">
+                                    <!-- Fond du cadran -->
+                                    <circle cx="30" cy="30" r="28" fill="#2c1e1a" stroke="#6d4c41" stroke-width="2"/>
+                                    
+                                    <!-- Bande de couleur (arc 270°) -->
+                                    <path class="color-band" d="M 8,30 A 22,22 0 0,1 52,30" 
+                                        fill="none" stroke="url(#gaugeGradient4)" stroke-width="6" stroke-linecap="round"/>
+                                    
+                                    <!-- Définition du dégradé jaune → vert → rouge -->
+                                    <defs>
+                                        <linearGradient id="gaugeGradient4" x1="0%" y1="0%" x2="100%" y2="0%">
+                                            <stop offset="0%" stop-color="#f9a825"/>   <!-- Jaune -->
+                                            <stop offset="50%" stop-color="#43a047"/>  <!-- Vert -->
+                                            <stop offset="100%" stop-color="#c62828"/> <!-- Rouge -->
+                                        </linearGradient>
+                                    </defs>
+
+                                    <!-- Aiguille -->
+                                    <line class="needle" x1="30" y1="30" x2="30" y2="10" 
+                                        stroke="#efd9b8" stroke-width="2.5" stroke-linecap="round"/>
+                                    
+                                    <!-- Centre (pivot) -->
+                                    <circle cx="30" cy="30" r="3.5" fill="#a1887f" stroke="#5d4037" stroke-width="1"/>
+                                </svg>
+                            </div>
+                        </td>
                     </tr>
                     <tr class="hole-row" data-hole-index="3">
                         <td>Trou 4</td>
@@ -191,6 +248,34 @@
                         <td><input type="text" name="holeDiameter" id="diam4" min="0.2" value="5/16" step="any" required></td>
                         <td style="display:none"><output name="resultHole" id="result4"></output></td>
 						<td><output id="result4Fraction"></output></td>
+                        <td class="gauge-cell">
+                            <div class="harmonic-gauge" data-position="4">
+                                <svg viewBox="0 0 60 60" width="54" height="54">
+                                    <!-- Fond du cadran -->
+                                    <circle cx="30" cy="30" r="28" fill="#2c1e1a" stroke="#6d4c41" stroke-width="2"/>
+                                    
+                                    <!-- Bande de couleur (arc 270°) -->
+                                    <path class="color-band" d="M 8,30 A 22,22 0 0,1 52,30" 
+                                        fill="none" stroke="url(#gaugeGradient3)" stroke-width="6" stroke-linecap="round"/>
+                                    
+                                    <!-- Définition du dégradé jaune → vert → rouge -->
+                                    <defs>
+                                        <linearGradient id="gaugeGradient3" x1="0%" y1="0%" x2="100%" y2="0%">
+                                            <stop offset="0%" stop-color="#f9a825"/>   <!-- Jaune -->
+                                            <stop offset="50%" stop-color="#43a047"/>  <!-- Vert -->
+                                            <stop offset="100%" stop-color="#c62828"/> <!-- Rouge -->
+                                        </linearGradient>
+                                    </defs>
+
+                                    <!-- Aiguille -->
+                                    <line class="needle" x1="30" y1="30" x2="30" y2="10" 
+                                        stroke="#efd9b8" stroke-width="2.5" stroke-linecap="round"/>
+                                    
+                                    <!-- Centre (pivot) -->
+                                    <circle cx="30" cy="30" r="3.5" fill="#a1887f" stroke="#5d4037" stroke-width="1"/>
+                                </svg>
+                            </div>
+                        </td>
                     </tr>
                     <tr class="hole-row" data-hole-index="2">
                         <td>Trou 3</td>
@@ -200,6 +285,34 @@
                         <td><input type="text" name="holeDiameter" id="diam3" min="0.2" value="5/16" step="any" required></td>
                         <td style="display:none"><output name="resultHole" id="result3"></output></td>
 						<td><output id="result3Fraction"></output></td>
+                        <td class="gauge-cell">
+                            <div class="harmonic-gauge" data-position="4">
+                                <svg viewBox="0 0 60 60" width="54" height="54">
+                                    <!-- Fond du cadran -->
+                                    <circle cx="30" cy="30" r="28" fill="#2c1e1a" stroke="#6d4c41" stroke-width="2"/>
+                                    
+                                    <!-- Bande de couleur (arc 270°) -->
+                                    <path class="color-band" d="M 8,30 A 22,22 0 0,1 52,30" 
+                                        fill="none" stroke="url(#gaugeGradient2)" stroke-width="6" stroke-linecap="round"/>
+                                    
+                                    <!-- Définition du dégradé jaune → vert → rouge -->
+                                    <defs>
+                                        <linearGradient id="gaugeGradient2" x1="0%" y1="0%" x2="100%" y2="0%">
+                                            <stop offset="0%" stop-color="#f9a825"/>   <!-- Jaune -->
+                                            <stop offset="50%" stop-color="#43a047"/>  <!-- Vert -->
+                                            <stop offset="100%" stop-color="#c62828"/> <!-- Rouge -->
+                                        </linearGradient>
+                                    </defs>
+
+                                    <!-- Aiguille -->
+                                    <line class="needle" x1="30" y1="30" x2="30" y2="10" 
+                                        stroke="#efd9b8" stroke-width="2.5" stroke-linecap="round"/>
+                                    
+                                    <!-- Centre (pivot) -->
+                                    <circle cx="30" cy="30" r="3.5" fill="#a1887f" stroke="#5d4037" stroke-width="1"/>
+                                </svg>
+                            </div>
+                        </td>
                     </tr>
                     <tr class="hole-row" data-hole-index="1">
                         <td>Trou 2</td>
@@ -209,6 +322,34 @@
                         <td><input type="text" name="holeDiameter" id="diam2" min="0.2" value="7/16" step="any" required></td>
                         <td style="display:none"><output name="resultHole" id="result2"></output></td>
 						<td><output id="result2Fraction"></output></td>
+                        <td class="gauge-cell">
+                            <div class="harmonic-gauge" data-position="4">
+                                <svg viewBox="0 0 60 60" width="54" height="54">
+                                    <!-- Fond du cadran -->
+                                    <circle cx="30" cy="30" r="28" fill="#2c1e1a" stroke="#6d4c41" stroke-width="2"/>
+                                    
+                                    <!-- Bande de couleur (arc 270°) -->
+                                    <path class="color-band" d="M 8,30 A 22,22 0 0,1 52,30" 
+                                        fill="none" stroke="url(#gaugeGradient1)" stroke-width="6" stroke-linecap="round"/>
+                                    
+                                    <!-- Définition du dégradé jaune → vert → rouge -->
+                                    <defs>
+                                        <linearGradient id="gaugeGradient1" x1="0%" y1="0%" x2="100%" y2="0%">
+                                            <stop offset="0%" stop-color="#f9a825"/>   <!-- Jaune -->
+                                            <stop offset="50%" stop-color="#43a047"/>  <!-- Vert -->
+                                            <stop offset="100%" stop-color="#c62828"/> <!-- Rouge -->
+                                        </linearGradient>
+                                    </defs>
+
+                                    <!-- Aiguille -->
+                                    <line class="needle" x1="30" y1="30" x2="30" y2="10" 
+                                        stroke="#efd9b8" stroke-width="2.5" stroke-linecap="round"/>
+                                    
+                                    <!-- Centre (pivot) -->
+                                    <circle cx="30" cy="30" r="3.5" fill="#a1887f" stroke="#5d4037" stroke-width="1"/>
+                                </svg>
+                            </div>
+                        </td>
                     </tr>
                     <tr class="hole-row" data-hole-index="0">
                         <td>Trou 1</td>
@@ -218,6 +359,34 @@
                         <td><input type="text" name="holeDiameter" id="diam1" min="0.2" value="1/4" step="any" required></td>
                         <td style="display:none"><output name="resultHole" id="result1"></output></td>
 						<td><output id="result1Fraction"></output></td>
+                        <td class="gauge-cell">
+                            <div class="harmonic-gauge" data-position="4">
+                                <svg viewBox="0 0 60 60" width="54" height="54">
+                                    <!-- Fond du cadran -->
+                                    <circle cx="30" cy="30" r="28" fill="#2c1e1a" stroke="#6d4c41" stroke-width="2"/>
+                                    
+                                    <!-- Bande de couleur (arc 270°) -->
+                                    <path class="color-band" d="M 8,30 A 22,22 0 0,1 52,30" 
+                                        fill="none" stroke="url(#gaugeGradient0)" stroke-width="6" stroke-linecap="round"/>
+                                    
+                                    <!-- Définition du dégradé jaune → vert → rouge -->
+                                    <defs>
+                                        <linearGradient id="gaugeGradient0" x1="0%" y1="0%" x2="100%" y2="0%">
+                                            <stop offset="0%" stop-color="#f9a825"/>   <!-- Jaune -->
+                                            <stop offset="50%" stop-color="#43a047"/>  <!-- Vert -->
+                                            <stop offset="100%" stop-color="#c62828"/> <!-- Rouge -->
+                                        </linearGradient>
+                                    </defs>
+
+                                    <!-- Aiguille -->
+                                    <line class="needle" x1="30" y1="30" x2="30" y2="10" 
+                                        stroke="#efd9b8" stroke-width="2.5" stroke-linecap="round"/>
+                                    
+                                    <!-- Centre (pivot) -->
+                                    <circle cx="30" cy="30" r="3.5" fill="#a1887f" stroke="#5d4037" stroke-width="1"/>
+                                </svg>
+                            </div>
+                        </td>
                     </tr>
                     <!-- End Finger Holes -->
                     <tr>
@@ -230,40 +399,7 @@
                     </tr>
                 </tbody>
             </table>
-            <!-- Légende des couleurs de fréquence de coupure -->
-            <div style="margin-top: 18px; padding: 12px 16px; background: rgba(0,0,0,0.25); border: 1px solid #6d4c41; border-radius: 8px; font-size: 0.92em;">
-                <strong style="color: #efd9b8;">Légende – Facilité d’octave (fc / 2f)</strong>
-                <div style="display: flex; flex-wrap: wrap; gap: 14px; margin-top: 10px; align-items: center;">
-                    <span style="display: inline-flex; align-items: center; gap: 6px;">
-                        <span style="width: 18px; height: 18px; background: #ffeb36; border-radius: 3px; display: inline-block;"></span>
-                        Jaune – un peu bas
-                    </span>
-                    <span style="display: inline-flex; align-items: center; gap: 6px;">
-                        <span style="width: 18px; height: 18px; background: #c0ca33; border-radius: 3px; display: inline-block;"></span>
-                        Lime – bas
-                    </span>
-                    <span style="display: inline-flex; align-items: center; gap: 6px;">
-                        <span style="width: 18px; height: 18px; background: #7cb342; border-radius: 3px; display: inline-block;"></span>
-                        Vert Clair – acceptable / bon
-                    </span>
-                    <span style="display: inline-flex; align-items: center; gap: 6px;">
-                        <span style="width: 18px; height: 18px; background: #2d7e33; border-radius: 3px; display: inline-block;"></span>
-                        Vert – zone idéale
-                    </span>
-                    <span style="display: inline-flex; align-items: center; gap: 6px;">
-                        <span style="width: 18px; height: 18px; background: #008982; border-radius: 3px; display: inline-block;"></span>
-                        Bleu - Vert – passable
-                    </span>
-                    <span style="display: inline-flex; align-items: center; gap: 6px;">
-                        <span style="width: 18px; height: 18px; background: #3475c0; border-radius: 3px; display: inline-block;"></span>
-                        Bleu – un peu haut
-                    </span>
-                </div>
-                <p style="margin: 10px 0 0 0; color: #d7ccc8; font-size: 0.88em;">
-                    La couleur indique le rapport entre la fréquence de coupure (fc) du réseau de trous et le double de la fréquence de la note.
-                    Plus le vert est atteint, plus l’octave est facilitée tout en gardant un bon équilibre de timbre.
-                </p>
-            </div>
+
         </fieldset>
 		<div>
     		<label for="fluteName">
@@ -278,7 +414,7 @@
 		<div>
  			<label for="notes">Notes :</label>
   			<br>
-    		<textarea id="notes" rows="5" style="width:100%; max-width:100%; box-sizing:border-box;"></textarea>
+    		<textarea id="notes" rows="5"></textarea>
 		</div>
 		<br>
 		

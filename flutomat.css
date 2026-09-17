@@ -236,7 +236,29 @@ td input[type="text"] {
     background: #f5e8d3;
     padding: 2px;
 }
+/* ===== Jauge harmonique vintage ===== */
+.gauge-cell {
+    text-align: center;
+    vertical-align: middle;
+    padding: 4px 2px !important;
+    background: transparent !important;
+}
 
+.harmonic-gauge {
+    display: inline-block;
+    line-height: 0;
+}
+
+.harmonic-gauge svg {
+    display: block;
+    margin: 0 auto;
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,0.45));
+}
+
+/* On laisse le transform SVG gérer la rotation */
+.harmonic-gauge .needle {
+    transition: none; /* on désactive la transition CSS pour éviter le conflit */
+}
 /* ===== Responsive : notes + dessin de la flûte ===== */
 
 /* La zone de notes ne doit jamais dépasser */
@@ -252,7 +274,7 @@ td input[type="text"] {
     display: block;
     width: 100%;
     max-width: 100%;
-    height: auto;          /* conserve le ratio */
+    height: auto;
     margin: 25px auto 10px;
     background: #2c1e1a;
     border: 2px solid #6d4c41;
@@ -260,15 +282,14 @@ td input[type="text"] {
     box-shadow: 0 6px 16px rgba(0,0,0,0.5);
 }
 
-/* Conteneur principal plus souple sur tablette */
+/* Conteneur principal plus souple */
 form {
     max-width: 920px;
     width: 100%;
     box-sizing: border-box;
-    padding: 20px;
 }
 
-/* Sur les écrans plus étroits (tablettes en portrait, etc.) */
+/* Tablettes et écrans moyens */
 @media (max-width: 900px) {
     body {
         padding: 10px;
@@ -281,7 +302,7 @@ form {
     }
 }
 
-/* Très petits écrans */
+/* Petits écrans */
 @media (max-width: 600px) {
     form {
         padding: 12px;
