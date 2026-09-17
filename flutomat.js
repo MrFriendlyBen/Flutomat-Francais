@@ -310,40 +310,32 @@ class FluteCalculator {
         this.clearResults(); // Clear old results as they are likely invalid
     }
 
-    /** updateUnitsBasedInputs() {
-        const isCm = this.units === 'cm';
-        const ratio = (isCm ? (1 / this.CM_TO_INCH) : this.CM_TO_INCH);
-        const digits = isCm ? 2 : 3;
-        this.wallThicknessInput.value = (Number(this.wallThicknessInput.value) * ratio).toFixed(digits);
-        this.boreDiameterInput.value = (Number(this.boreDiameterInput.value) * ratio).toFixed(digits);
-        this.embouchureDiameterInput.value = (Number(this.embouchureDiameterInput.value) * ratio).toFixed(digits);
-        for (let i = 0; i < this.HOLE_COUNT; i++) {
-            this.holeDiameterInputs[i].value = (Number(this.holeDiameterInputs[i].value) * ratio).toFixed(digits);
-        }
-    } */
-    
     updateUnitsBasedInputs() {
-        const isCm = this.units === 'cm';
-        const ratio = isCm ? (1 / this.CM_TO_INCH) : this.CM_TO_INCH;
+        const isMm = this.units === 'mm';
+        // 1 pouce = 25.4 mm
+        const ratio = isMm ? 25.4 : (1 / 25.4);
 
-        // Fonction locale pour formater selon l'unité
-            const formatValue = (val) => {
-            const num = this.parseFraction(val) * ratio;
-            if (isCm) {
-                // En cm → décimal avec 2 chiffres
-                return num.toFixed(2);
+        const formatValue = (val) => {
+            const num = this.parseFraction(val);
+            if (isNaN(num)) return val; // on ne touche pas aux valeurs invalides
+
+            if (isMm) {
+                // Affichage en mm (1 décimale suffit pour une flûte)
+                return (num * ratio).toFixed(1);
             } else {
-                // En pouces → fraction
-                return this.decimalToFraction32(num).replace('"', '');
+                // Retour en fraction de 32e de pouce
+                return this.decimalToFraction32(num * ratio).replace('"', '');
             }
         };
 
-        this.wallThicknessInput.value = formatValue(this.wallThicknessInput.value);
-        this.boreDiameterInput.value = formatValue(this.boreDiameterInput.value);
+        this.wallThicknessInput.value     = formatValue(this.wallThicknessInput.value);
+        this.boreDiameterInput.value      = formatValue(this.boreDiameterInput.value);
         this.embouchureDiameterInput.value = formatValue(this.embouchureDiameterInput.value);
 
         for (let i = 0; i < this.HOLE_COUNT; i++) {
-            this.holeDiameterInputs[i].value = formatValue(this.holeDiameterInputs[i].value);
+            if (this.holeDiameterInputs[i]) {
+                this.holeDiameterInputs[i].value = formatValue(this.holeDiameterInputs[i].value);
+            }
         }
     }
 
@@ -454,29 +446,29 @@ class FluteCalculator {
     calculateSpeedOfSound() {
         const speedOfSoundMps = 331.3 * Math.sqrt(1 + this.temperatureCelsius / 273.15);
 
-        if (this.units === 'cm') {
-            this.speedOfSound = speedOfSoundMps * 100; // m/s to cm/s
+        if (this.units === 'mm') {
+            this.speedOfSound = speedOfSoundMps * 1000;      // m/s → mm/s
+        } else if (this.units === 'cm') {
+            this.speedOfSound = speedOfSoundMps * 100;       // m/s → cm/s
         } else { // inches
-            this.speedOfSound = speedOfSoundMps * 39.3701; // m/s to inches/s
+            this.speedOfSound = speedOfSoundMps * 39.3701;   // m/s → inches/s
         }
-        // Check if speed is valid before updating display
+
         if (isNaN(this.speedOfSound)) {
             console.error("Could not calculate speed of sound.");
             this.speedOfSoundDisplay.textContent = "Speed of Sound: Error";
-            this.speedOfSound = NaN; // Ensure invalid state propagates
+            this.speedOfSound = NaN;
         } else {
             this.updateSpeedOfSoundDisplay();
         }
-
     }
 
     /** Updates the displayed speed of sound value. */
     updateSpeedOfSoundDisplay() {
-		const unitLabel = 
-			this.units === "inches"
-				? "pouces"
-				: "cm";
-		
+        let unitLabel = "pouces";
+        if (this.units === "mm") unitLabel = "mm";
+        else if (this.units === "cm") unitLabel = "cm";
+
         if (!isNaN(this.speedOfSound)) {
             this.speedOfSoundDisplay.textContent = `Vitesse du Son: ${this.speedOfSound.toFixed(1)} ${unitLabel}/s`;
         } else {
@@ -1087,30 +1079,55 @@ updateFrequenciesFromKey() {
             this.clearFluteImage();
         }
     }
+    /**
+     * Formate une distance selon l'unité courante
+     */
+    formatDistance(value) {
+        if (isNaN(value)) return "—";
+        if (this.units === 'mm') {
+            return value.toFixed(1);
+        }
+        return this.decimalToFraction32(value);
+    }
 
     /**
      * Displays the calculated physical positions in the output fields.
      */
     displayResultsInForm() {
-        const format = (value) => isNaN(value) ? "—" : value.toFixed(3);
+        // Fonction de formatage selon l'unité
+        const formatDistance = (value) => {
+            if (isNaN(value)) return "—";
 
-        this.resultEmbouchureOutput.value = format(this.embouchurePhysicalPosition);
-        this.resultEmbouchureFractionOutput.value = isNaN(this.embouchurePhysicalPosition)
+            if (this.units === 'mm') {
+                // En mm → décimal avec 1 chiffre
+                return value.toFixed(1);
+            } else {
+                // En pouces → fraction
+                return this.decimalToFraction32(value);
+            }
+        };
+
+        // Embouchure
+        this.resultEmbouchureOutput.value = isNaN(this.embouchurePhysicalPosition)
             ? "—"
-            : this.decimalToFraction32(this.embouchurePhysicalPosition);
+            : this.embouchurePhysicalPosition.toFixed(3);
+
+        this.resultEmbouchureFractionOutput.value = formatDistance(this.embouchurePhysicalPosition);
+
         this.resultEndOutput.value = "0.000";
 
+        // Trous
         for (let i = 0; i < this.HOLE_COUNT; i++) {
             if (this.holeResultOutputs[i]) {
                 const pos = this.holes[i]?.physicalPosition;
-                this.holeResultOutputs[i].value = format(pos);
-                this.holeFractionOutputs[i].value = isNaN(pos)
-                    ? "—"
-                    : this.decimalToFraction32(pos);
+
+                this.holeResultOutputs[i].value = isNaN(pos) ? "—" : pos.toFixed(3);
+
+                this.holeFractionOutputs[i].value = formatDistance(pos);
             }
         }
-        this.updateHarmonicGauges();
 
+        this.updateHarmonicGauges();
     }
     
     
@@ -1161,21 +1178,7 @@ updateFrequenciesFromKey() {
         context.strokeStyle = 'red';
         context.lineWidth = 1;
 
-        // Small arcs under the flute's shape, as indicators
-        //{
-        //    const numberOfArcs = 100;
 
-        //    context.strokeStyle = '#dddddd';
-            // context.strokeStyle = 'red';
-
-        //    for (let i = 1; i <= numberOfArcs; i++) {
-        //        const arcX = maxCorkLength * 1.5 + Math.floor(i * (displayFluteLength) / numberOfArcs);
-        //        context.beginPath();
-        //        context.arc(arcX, centerFluteY, displayBoreDiameter / 2, Math.PI * 0.5, Math.PI * 1.5);
-        //        context.stroke();
-        //    }
-        //}
-        
 
         // Draw flute's outer shape
         {
@@ -1290,30 +1293,28 @@ updateFrequenciesFromKey() {
 
             // Flute length measurement
             //drawMeasurementLine(rawFluteLength, measurementLinesBaseY + spaceBetweenMeasurementLines * (this.HOLE_COUNT + 2), `Longueur de la flûte: ${rawFluteLength.toFixed(digits)} ${unitLabel}`);
-			const unitLabel =
-    			this.units === "inches"
-      				? "po"
-        			: "cm";
-            // Holes measurements
-			const embFraction = this.decimalToFraction32(Number(this.resultEmbouchureOutput.value));
+            const unitLabel = this.units === "inches" ? "po" : "mm";
 
-			const embDiamFraction = this.decimalToFraction32(this.embouchureDiameter);
-			
-            drawMeasurementLine(this.resultEmbouchureOutput.value, measurementLinesBaseY + spaceBetweenMeasurementLines * (this.HOLE_COUNT + 1), `Embouchure: ${embFraction} ; Ø ${embDiamFraction}`);
+            // Embouchure
+            const embText = this.formatDistance(Number(this.resultEmbouchureOutput.value));
+            const embDiamText = this.formatDistance(this.embouchureDiameter);
+
+            drawMeasurementLine(
+                this.resultEmbouchureOutput.value,
+                measurementLinesBaseY + spaceBetweenMeasurementLines * (this.HOLE_COUNT + 1),
+                `Embouchure: ${embText} ; Ø ${embDiamText}`
+            );
+
+            // Trous
             for (let i = 0; i < this.HOLE_COUNT; i++) {
-						const length =
-    						this.decimalToFraction32(
-       						Number(
-        						    this.holeResultOutputs[i].value
-    							  )
-   						);
+                const length = this.formatDistance(Number(this.holeResultOutputs[i].value));
+                const diameter = this.formatDistance(this.parseFraction(this.holeDiameterInputs[i].value));
 
-						const diameter =
-                                this.decimalToFraction32(
-                                this.parseFraction(this.holeDiameterInputs[i].value)
-                                );
-                drawMeasurementLine(Number(this.holeResultOutputs[i].value), measurementLinesBaseY + spaceBetweenMeasurementLines * (i + 1), `${length} ; Ø ${diameter}`
-);
+                drawMeasurementLine(
+                    Number(this.holeResultOutputs[i].value),
+                    measurementLinesBaseY + spaceBetweenMeasurementLines * (i + 1),
+                    `${length} ; Ø ${diameter}`
+                );
             }
 
             // Cork measurements
@@ -1485,7 +1486,7 @@ updateFrequenciesFromKey() {
             <td>${note}</td>
             <td>${this.holeFrequencyInputs[i].value}</td>
             <td>${this.holeDiameterInputs[i].value}</td>
-            <td>${this.decimalToFraction32(Number(this.holeResultOutputs[i].value))}</td>
+            <td>${this.formatDistance(Number(this.holeResultOutputs[i].value))}</td>
             </tr>
         `;
     }
@@ -1567,7 +1568,7 @@ img{
 <b>Unités:</b> ${
     this.units === "inches"
         ? "pouces"
-        : "cm"
+        : "mm"
 }
 
 </div>
@@ -1617,7 +1618,7 @@ ${holeTable}
 <b>Unités:</b> ${
     this.units === "inches"
         ? "pouces"
-        : "cm"
+        : "mm"
 }
 
 </div>
