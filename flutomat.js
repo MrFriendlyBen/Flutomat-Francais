@@ -1469,177 +1469,325 @@ updateFrequenciesFromKey() {
         };
     }
 	
-	printReport() {
+	/**printReport() {
 
-    const imageDataUrl = this.renderedFluteElement.toDataURL();
-    const fluteName = document.getElementById("fluteName")?.value || "Unnamed flute";
-    const notes = document.getElementById("notes")?.value || "";
-    const today = new Date().toLocaleString();
-    
-    let holeTable = "";
-    // Boucle inversée : 6 en haut → 1 en bas
-    for (let i = this.activeHoleCount - 1; i >= 0; i--) {
-        const note = this.frequencyToNoteName(parseFloat(this.holeFrequencyInputs[i].value));
-        holeTable += `
-        <tr>
-            <td>${i + 1}</td>
-            <td>${note}</td>
-            <td>${this.holeFrequencyInputs[i].value}</td>
-            <td>${this.holeDiameterInputs[i].value}</td>
-            <td>${this.formatDistance(Number(this.holeResultOutputs[i].value))}</td>
+        const imageDataUrl = this.renderedFluteElement.toDataURL();
+        const fluteName = document.getElementById("fluteName")?.value || "Unnamed flute";
+        const notes = document.getElementById("notes")?.value || "";
+        const today = new Date().toLocaleString();
+        
+        let holeTable = "";
+        // Boucle inversée : 6 en haut → 1 en bas
+        for (let i = this.activeHoleCount - 1; i >= 0; i--) {
+            const note = this.frequencyToNoteName(parseFloat(this.holeFrequencyInputs[i].value));
+            holeTable += `
+            <tr>
+                <td>${i + 1}</td>
+                <td>${note}</td>
+                <td>${this.holeFrequencyInputs[i].value}</td>
+                <td>${this.holeDiameterInputs[i].value}</td>
+                <td>${this.formatDistance(Number(this.holeResultOutputs[i].value))}</td>
+                </tr>
+            `;
+        }
+
+        const printWindow = window.open("", "_blank");
+
+        printWindow.document.write(`
+
+            <!DOCTYPE html>
+
+            <html>
+
+            <head>
+
+            <title>${fluteName}</title>
+
+            <style>
+
+            @page{
+                size:A4 landscape;
+                margin:10mm;
+            }
+
+            body{
+                font-family:Arial,sans-serif;
+            }
+
+            h1{
+                margin-bottom:5px;
+            }
+
+            .info{
+                margin-bottom:10px;
+            }
+
+            .notes{
+                border:1px solid #888;
+                padding:10px;
+                min-height:80px;
+                white-space:pre-wrap;
+            }
+
+            table{
+                width:100%;
+                border-collapse:collapse;
+                margin-top:10px;
+            }
+
+            th,td{
+                border:1px solid #aaa;
+                padding:4px;
+            }
+
+            img{
+                width:100%;
+                max-height:400px;
+                object-fit:contain;
+                border:1px solid #aaa;
+            }
+
+            </style>
+
+            </head>
+
+            <body>
+
+            <h1>${fluteName}</h1>
+
+            <div class="info">
+
+            <b>Date:</b> ${today}<br>
+
+            <b>Diamètre interne du Tube:</b> ${this.boreDiameter}<br>
+
+            <b>Épaisseur du Mur:</b> ${this.wallThickness}<br>
+
+            <b>Embouchure:</b> ${this.embouchureDiameter}<br>
+
+            <b>Unités:</b> ${
+                this.units === "inches"
+                    ? "pouces"
+                    : "mm"
+            }
+
+            </div>
+
+            <h2>Notes</h2>
+
+            <div class="notes">
+            ${notes}
+            </div>
+
+            <h2>Hole Data</h2>
+
+            <table>
+
+            <tr>
+            <th>Trou</th>
+            <th>Note</th>
+            <th>Fréquence</th>
+            <th>Diamètre</th>
+            <th>Position</th>
+            </tr>
+
+            ${holeTable}
+
+            </table>
+
+            <br><br>
+                    
+            <br><br>
+
+            <br><br>
+                    
+            <h2>Dessin de la flûte</h2>
+
+            <h1>${fluteName}</h1>
+
+            <div class="info">
+
+            <b>Date:</b> ${today}<br>
+
+            <b>Diamètre interne du Tube:</b> ${this.boreDiameter}<br>
+
+            <b>Épaisseur du Mur:</b> ${this.wallThickness}<br>
+
+            <b>Embouchure:</b> ${this.embouchureDiameter}<br>
+
+            <b>Unités:</b> ${
+                this.units === "inches"
+                    ? "pouces"
+                    : "mm"
+            }
+
+            </div>
+
+            <br>
+
+            <img src="${imageDataUrl}" alt="Flûte"
+
+            </body>
+
+            </html>
+
+           `);
+
+        printWindow.document.close();
+
+        printWindow.onload = () => {
+            printWindow.print();
+        };
+    } */
+	printReport() {
+        const imageDataUrl = this.renderedFluteElement.toDataURL();
+        const fluteName = document.getElementById("fluteName")?.value || "Flûte sans nom";
+        const notes = document.getElementById("notes")?.value || "";
+        const today = new Date().toLocaleString();
+
+        // Formatage selon l'unité
+        const fmt = (val) => this.formatDistance(Number(val));
+
+        // Tableau compact (Embouchure + trous)
+        let holeTable = `
+            <tr>
+                <td>Emb.</td>
+                <td>—</td>
+                <td>—</td>
+                <td>${this.embouchureDiameterInput.value}</td>
+                <td>${fmt(this.resultEmbouchureOutput.value)}</td>
             </tr>
         `;
+
+        // Trous 6 → 1
+        for (let i = this.activeHoleCount - 1; i >= 0; i--) {
+            const note = this.frequencyToNoteName(parseFloat(this.holeFrequencyInputs[i].value));
+            holeTable += `
+            <tr>
+                <td>${i + 1}</td>
+                <td>${note}</td>
+                <td>${this.holeFrequencyInputs[i].value}</td>
+                <td>${this.holeDiameterInputs[i].value}</td>
+                <td>${fmt(this.holeResultOutputs[i].value)}</td>
+            </tr>`;
+        }
+
+        // Note de base
+        holeTable += `
+            <tr>
+                <td>Tous fermés</td>
+                <td>${this.frequencyToNoteName(parseFloat(this.endFrequencyInput.value))}</td>
+                <td>${this.endFrequencyInput.value}</td>
+                <td>—</td>
+                <td>0</td>
+            </tr>
+        `;
+
+        const unitLabel = this.units === "inches" ? "pouces" : "mm";
+
+        const printWindow = window.open("", "_blank");
+
+        printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <title>${fluteName}</title>
+    <style>
+    @page {
+        size: A4 portrait;
+        margin: 12mm;
     }
+    body {
+        font-family: Arial, sans-serif;
+        font-size: 11px;
+        margin: 0;
+        padding: 0;
+        color: #222;
+    }
+    h1 {
+        font-size: 18px;
+        margin: 0 0 6px 0;
+    }
+    .info {
+        font-size: 11px;
+        margin-bottom: 8px;
+        line-height: 1.4;
+    }
+    .notes {
+        border: 1px solid #888;
+        padding: 8px;
+        min-height: 70px;
+        white-space: pre-wrap;
+        margin-bottom: 10px;
+        font-size: 11px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 10px;
+        font-size: 10px;
+    }
+    th, td {
+        border: 1px solid #aaa;
+        padding: 3px 5px;
+        text-align: center;
+    }
+    th {
+        background: #eee;
+    }
+    img {
+        width: 100%;
+        max-height: 320px;
+        object-fit: contain;
+        border: 1px solid #aaa;
+        display: block;
+    }
+    .section-title {
+        font-size: 13px;
+        font-weight: bold;
+        margin: 8px 0 4px 0;
+    }
+    </style>
+    </head>
+    <body>
 
-    const printWindow = window.open("", "_blank");
+    <h1>${fluteName}</h1>
 
-    printWindow.document.write(`
+    <div class="info">
+        <b>Date :</b> ${today}<br>
+        <b>Diamètre intérieur :</b> ${fmt(this.boreDiameter)} &nbsp;&nbsp;
+        <b>Épaisseur :</b> ${fmt(this.wallThickness)} &nbsp;&nbsp;
+        <b>Embouchure Ø :</b> ${this.embouchureDiameterInput.value}<br>
+        <b>Unités :</b> ${unitLabel}
+    </div>
 
-<!DOCTYPE html>
+    <div class="section-title">Notes</div>
+    <div class="notes">${notes || "—"}</div>
 
-<html>
+    <div class="section-title">Trous & Positions</div>
+    <table>
+        <tr>
+            <th>Trou</th>
+            <th>Note</th>
+            <th>Fréq. (Hz)</th>
+            <th>Ø</th>
+            <th>Position</th>
+        </tr>
+        ${holeTable}
+    </table>
 
-<head>
+    <div class="section-title">Dessin de la flûte</div>
+    <img src="${imageDataUrl}" alt="Flûte">
 
-<title>${fluteName}</title>
+    </body>
+    </html>
+    `);
 
-<style>
-
-@page{
-    size:A4 landscape;
-    margin:10mm;
-}
-
-body{
-    font-family:Arial,sans-serif;
-}
-
-h1{
-    margin-bottom:5px;
-}
-
-.info{
-    margin-bottom:10px;
-}
-
-.notes{
-    border:1px solid #888;
-    padding:10px;
-    min-height:80px;
-    white-space:pre-wrap;
-}
-
-table{
-    width:100%;
-    border-collapse:collapse;
-    margin-top:10px;
-}
-
-th,td{
-    border:1px solid #aaa;
-    padding:4px;
-}
-
-img{
-	width:100%;
-	max-height:400px;
-	object-fit:contain;
-	border:1px solid #aaa;
-}
-
-</style>
-
-</head>
-
-<body>
-
-<h1>${fluteName}</h1>
-
-<div class="info">
-
-<b>Date:</b> ${today}<br>
-
-<b>Diamètre interne du Tube:</b> ${this.boreDiameter}<br>
-
-<b>Épaisseur du Mur:</b> ${this.wallThickness}<br>
-
-<b>Embouchure:</b> ${this.embouchureDiameter}<br>
-
-<b>Unités:</b> ${
-    this.units === "inches"
-        ? "pouces"
-        : "mm"
-}
-
-</div>
-
-<h2>Notes</h2>
-
-<div class="notes">
-${notes}
-</div>
-
-<h2>Hole Data</h2>
-
-<table>
-
-<tr>
-<th>Trou</th>
-<th>Note</th>
-<th>Fréquence</th>
-<th>Diamètre</th>
-<th>Position</th>
-</tr>
-
-${holeTable}
-
-</table>
-
-<br><br>
-		
-<br><br>
-
-<br><br>
-		
-<h2>Dessin de la flûte</h2>
-
-<h1>${fluteName}</h1>
-
-<div class="info">
-
-<b>Date:</b> ${today}<br>
-
-<b>Diamètre interne du Tube:</b> ${this.boreDiameter}<br>
-
-<b>Épaisseur du Mur:</b> ${this.wallThickness}<br>
-
-<b>Embouchure:</b> ${this.embouchureDiameter}<br>
-
-<b>Unités:</b> ${
-    this.units === "inches"
-        ? "pouces"
-        : "mm"
-}
-
-</div>
-
-<br>
-
-<img src="${imageDataUrl}" alt="Flûte"
-
-</body>
-
-</html>
-
-`);
-
-    printWindow.document.close();
-
-    printWindow.onload = () => {
-        printWindow.print();
-    };
-}
-	
+        printWindow.document.close();
+        printWindow.onload = () => {
+            printWindow.print();
+        };
+    }
 	getSettings(){
 
     return{
