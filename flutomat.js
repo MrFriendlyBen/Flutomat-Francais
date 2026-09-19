@@ -1413,8 +1413,8 @@ updateFrequenciesFromKey() {
         const pageMarginMm = 5;
         const a4LandscapeWidthMm = 297;
         const printableWidthMm = a4LandscapeWidthMm - 2 * pageMarginMm;
-        const printableWidth = cssUnit === 'cm'
-            ? printableWidthMm / 10 // Metric system
+        const printableWidth = cssUnit === 'mm'
+            ? printableWidthMm / 1 // Metric system
             : printableWidthMm / 25.4 // Imperial system
         ;
         const pageCount = Math.ceil(rawFluteLength / printableWidth);
