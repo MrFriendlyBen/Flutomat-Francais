@@ -66,17 +66,17 @@
     			<div style="margin-top: 10px; font-size: 0.88em; line-height: 1.45; opacity: 0.85;">
         			<strong>Aide rapide :</strong><br>
         			• 0 % = aucun wedge<br>
-        			• 50 % = valeur typique wedge moyen (recommandée pour commencer)<br>
+        			• 50 % = valeur typique wedge moyen<br>
         			• 100 % = effet fort plus gros wedge<br><br>
-        			Montez ou baissez selon ce que vous entendez sur le 2<sup>e</sup> octave.<br>
-        			<em>Ceci est une approximation empirique, pas un calcul géométrique précis du wedge.</em>
+        			Montez ou baissez pour voir l'effet sur la position de l'embouchure.<br>
+        			<em>Ceci est une approximation empirique, pas un calcul géométrique précis de l'effet du wedge.</em>
     			</div>
 			</div>
         </fieldset>
 
         <fieldset>
-            <legend>Tonalité & Dimensions des trous</legend>
-            <p>Choisir la tonalité ou entrez les fréquences manuellement. Les diamètres sont requis.</p>
+            <legend>Tonalité, Mode & Dimensions des trous</legend>
+            <p>Choisir la tonalité ou entrez les fréquences manuellement. Choisir un mode ou entrez manuellement le mode de la gamme. Les diamètres des trous sont requis. Ensuite appuyez sur Calcul des positions</p>
             <div>
                 <label for="keySelector">Tonalité:</label>
                 <select id="keySelector">
@@ -134,7 +134,7 @@
                     <option value="3333">Tétracorde</option>
                 </select>
                 </div>
-                    <label for="intervalSequence">Intervalles, nombre de demi-tons entre chaque note (ex: 221222 diatonique majeure ou 32232 pentatonique mineure ou autres) l'harmonique est atteinte par le contrôle du souffle:</label>
+                    <label for="intervalSequence">Intervalles; nombre de demi-tons entre chaque note (ex: 221222 diatonique majeure ou 32232 pentatonique mineure etc. ou personnalisé)</label>
                     <input type="text" id="intervalSequence" value="221222" placeholder="221222" size="15">
                 </div>
             </div>
@@ -419,12 +419,15 @@
     		<textarea id="notes" rows="5"></textarea>
 		</div>
 		<br>
-		
+    		<p style="font-size: 0.85em; opacity: 0.8; margin-top: 4px;">
+                Le bouton "Imprime Image" donne une image de la flûte grandeur nature sur plusieurs pages que vous pouvez découper et assembler servant de patron pour indiquer où percer. Le bouton "Imprime Rapport" donne plutôt un guide d'atelier permettant de constituer des archives papier/ PDF pour la reproduction de telle ou telle flûte.
+            </p>
 
         <button type="submit" id="calculateButton">🧮&nbsp;Calcul des positions</button>
+		<br>
 		<button type="button" id="saveFluteButton">💾 Enregistrer</button>
 		<button type="button" id="loadFluteButton">📂 Ouvrir</button>
-		<button type="button" id="shareUrlButton">🔗 Partage URL</button>
+		<!-- <button type="button" id="shareUrlButton">🔗 Partage URL</button>-->
 		
 		<input
     		type="file"
@@ -432,14 +435,19 @@
     		accept=".json"
     		style="display:none;"
 		>
-        <button type="button" id="printButton">🖨&nbsp;Imprime image</button>
+		<br>
+        <button type="button" id="printButton">🖨&nbsp;Imprime Image</button>
 		<button type="button" id="reportButton">📋 Imprime Rapport</button>
+		<br>
         <button type="reset" id="resetButton">🗑&nbsp;Reset par défaut</button>
+        <br>
         <a href="mailto:MrFriendlyBen@gmail.com" class="btn-logo">
             <img src="Metta3.jpg" alt="Logo" class="btn-logo-img">
             @MrFriendlyBen
         </a>
-
+   		<p style="font-size: 0.85em; opacity: 0.8; margin-top: 4px;">
+                Le dessin de la flûte est dynamique et s'ajuste en fonction des paramètres choisis.
+        </p>
 
 
 
