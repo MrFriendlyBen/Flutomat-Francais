@@ -46,6 +46,7 @@ class FluteCalculator {
         this.endFrequencyInput = document.getElementById('endFrequency');
         this.keySelector = document.getElementById('keySelector');
         this.intervalSequenceInput = document.getElementById('intervalSequence');
+        this.playScaleButton = document.getElementById('playScaleButton');
         this.scalePresetSelect = document.getElementById('scalePreset');
         this.calculateButton = document.getElementById('calculateButton');
         this.resetButton = document.getElementById('resetButton');
@@ -276,8 +277,12 @@ class FluteCalculator {
 		this.loadFluteButton.addEventListener('click',()=>this.loadFlute());
 		//this.exportJsonButton.addEventListener('click',()=>this.exportJson());
 		//this.importJsonButton.addEventListener('click',()=>this.jsonFileInput.click());
-		this.shareUrlButton.addEventListener('click',()=>this.generateShareUrl());
-		this.jsonFileInput.addEventListener('change',(e)=>this.importJson(e));
+        if (this.shareUrlButton) {
+            this.shareUrlButton.addEventListener('click', () => this.generateShareUrl());
+        }
+        if (this.jsonFileInput) {
+            this.jsonFileInput.addEventListener('change', (e) => this.importJson(e));
+        }
         // === Wedge de Fajardo ===
         if (this.fajardoWedgeCheckbox) {
             this.fajardoWedgeCheckbox.addEventListener('change', () => this.calculateAllPositions());
@@ -289,6 +294,10 @@ class FluteCalculator {
                 }
                 this.calculateAllPositions();
             });
+        }
+        // Bouton Écouter la gamme
+        if (this.playScaleButton) {
+            this.playScaleButton.addEventListener('click', () => this.playScale());
         }
     }
 
@@ -498,50 +507,157 @@ class FluteCalculator {
         return this.A4_FREQUENCY_HZ * Math.pow(2, (midiNote - this.MIDI_A4_NOTE) / 12.0);
     }
 
-updateFrequenciesFromKey() {
-    const baseMidiNote = parseInt(this.keySelector.value, 10);
-    if (isNaN(baseMidiNote)) {
-        console.error("Invalid key selected.");
-        return;
+    updateFrequenciesFromKey() {
+        const baseMidiNote = parseInt(this.keySelector.value, 10);
+        if (isNaN(baseMidiNote)) {
+            console.error("Invalid key selected.");
+            return;
+        }
+
+        // Lire la séquence (ex: "322212")
+        const sequenceStr = (this.intervalSequenceInput?.value || "2212221").replace(/\s+/g, "");
+        const intervals = sequenceStr.split("").map(n => parseInt(n, 10)).filter(n => !isNaN(n) && n > 0);
+
+        // Note de base
+        let currentMidi = baseMidiNote;
+        this.endFrequencyInput.value = this.midiNoteToFrequency(currentMidi).toFixed(2);
+
+        // Remplir les trous
+        for (let i = 0; i < this.HOLE_COUNT; i++) {
+            if (i < intervals.length) {
+                currentMidi += intervals[i];
+                this.holeFrequencyInputs[i].value = this.midiNoteToFrequency(currentMidi).toFixed(2);
+            } else {
+                this.holeFrequencyInputs[i].value = "";   // laisse vide
+            }
+        }
+
+        this.activeHoleCount = intervals.length;
+
+        this.updateVisibleHoles();
+
+        // Afficher les noms de notes
+        for (let i = 0; i < this.HOLE_COUNT; i++) {
+                const noteEl = document.getElementById(`note${i + 1}`);
+            if (noteEl) {
+                const freq = parseFloat(this.holeFrequencyInputs[i].value);
+                noteEl.value = this.frequencyToNoteName(freq);
+            }
+            // Note de base (fin de flûte)
+                const noteEndEl = document.getElementById('noteEnd');
+            if (noteEndEl) {
+                const baseFreq = parseFloat(this.endFrequencyInput.value);
+                noteEndEl.value = this.frequencyToNoteName(baseFreq);
+            }
+        }
     }
 
-    // Lire la séquence (ex: "322212")
-    const sequenceStr = (this.intervalSequenceInput?.value || "2212221").replace(/\s+/g, "");
-    const intervals = sequenceStr.split("").map(n => parseInt(n, 10)).filter(n => !isNaN(n) && n > 0);
+    playScale() {
+        if (this.isPlayingScale) return;
+        this.isPlayingScale = true;
 
-    // Note de base
-    let currentMidi = baseMidiNote;
-    this.endFrequencyInput.value = this.midiNoteToFrequency(currentMidi).toFixed(2);
+        const baseMidi = parseInt(this.keySelector.value, 10);
+        if (isNaN(baseMidi)) {
+            this.isPlayingScale = false;
+            return;
+        }
 
-    // Remplir les trous
-    for (let i = 0; i < this.HOLE_COUNT; i++) {
-        if (i < intervals.length) {
-            currentMidi += intervals[i];
-            this.holeFrequencyInputs[i].value = this.midiNoteToFrequency(currentMidi).toFixed(2);
+        const sequenceStr = (this.intervalSequenceInput?.value || "221222").replace(/\s+/g, "");
+        const intervals = sequenceStr.split("").map(n => parseInt(n, 10)).filter(n => !isNaN(n) && n > 0);
+
+        const notesMidi = [baseMidi];
+        let current = baseMidi;
+        for (let i = 0; i < intervals.length; i++) {
+            current += intervals[i];
+            notesMidi.push(current);
+        }
+
+        const frequencies = notesMidi.map(midi => this.midiNoteToFrequency(midi));
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        // Fonction qui joue vraiment les notes
+        const startPlaying = () => {
+            let time = audioCtx.currentTime + 0.1;
+            const noteDuration = 0.35;
+            const gap = -0.05;
+
+            const playNote = (freq, startTime, duration = noteDuration) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+
+                osc.type = "sine";
+                osc.frequency.value = freq;
+
+                gain.gain.setValueAtTime(0, startTime);
+                gain.gain.linearRampToValueAtTime(0.35, startTime + 0.03);
+                gain.gain.linearRampToValueAtTime(0, startTime + duration);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start(startTime);
+                osc.stop(startTime + duration + 0.05);
+            };
+
+            for (let rep = 0; rep < 1; rep++) {
+                // 1. Montée + descente (comme avant)
+                frequencies.forEach(freq => {
+                    playNote(freq, time);
+                    time += noteDuration + gap;
+                });
+
+                for (let i = frequencies.length - 2; i >= 0; i--) {
+                    playNote(frequencies[i], time);
+                    time += noteDuration + gap;
+                }
+
+                // Petite pause après la descente
+                time += 0.15;
+
+                // Impro : notes aléatoires, durée variable, toujours terminée par la tonique
+                const improLength = 20;
+                let lastIndex = -1;
+
+                // Toutes les notes sauf la dernière
+                for (let i = 0; i < improLength - 1; i++) {
+                    let randomIndex;
+                    do {
+                        randomIndex = Math.floor(Math.random() * frequencies.length);
+                    } while (randomIndex === lastIndex && frequencies.length > 1);
+
+                    // Durée aléatoire entre 0.18 et 0.45 seconde
+                    const randomDuration = 0.15 + Math.random() * 0.45;
+
+                    playNote(frequencies[randomIndex], time, randomDuration);
+                    time += randomDuration + gap;
+                    lastIndex = randomIndex;
+                }
+
+                // Dernière note = toujours la tonique (durée un peu plus longue)
+                const finalDuration = 0.45;
+                playNote(frequencies[0], time, finalDuration);
+                time += finalDuration + gap;
+            }
+
+            const totalDuration = (time - audioCtx.currentTime) * 1000 + 400;
+            setTimeout(() => {
+                this.isPlayingScale = false;
+                audioCtx.close();
+            }, totalDuration);
+        };
+
+        // Réveiller le contexte puis jouer
+        if (audioCtx.state === "suspended") {
+            audioCtx.resume().then(startPlaying).catch(() => {
+                console.error("Impossible de démarrer l'audio");
+                this.isPlayingScale = false;
+            });
         } else {
-            this.holeFrequencyInputs[i].value = "";   // laisse vide
+            startPlaying();
         }
     }
 
-    this.activeHoleCount = intervals.length;
-
-    this.updateVisibleHoles();
-
-    // Afficher les noms de notes
-    for (let i = 0; i < this.HOLE_COUNT; i++) {
-            const noteEl = document.getElementById(`note${i + 1}`);
-        if (noteEl) {
-            const freq = parseFloat(this.holeFrequencyInputs[i].value);
-            noteEl.value = this.frequencyToNoteName(freq);
-        }
-        // Note de base (fin de flûte)
-            const noteEndEl = document.getElementById('noteEnd');
-        if (noteEndEl) {
-            const baseFreq = parseFloat(this.endFrequencyInput.value);
-            noteEndEl.value = this.frequencyToNoteName(baseFreq);
-        }
-    }
-}
     // --- Acoustic Calculation Functions (Ported and Renamed) ---
 
     /**
