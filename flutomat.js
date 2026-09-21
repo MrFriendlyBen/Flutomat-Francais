@@ -1827,30 +1827,52 @@ updateFrequenciesFromKey() {
     };
 }
 
-applySettings(settings){
-	
-	document.getElementById("fluteName").value=settings.name || "";
-	
-	document.getElementById("notes").value=settings.notes || "";
+applySettings(settings) {
+    // 1. Restaurer le nom et les notes
+    document.getElementById("fluteName").value = settings.name || "";
+    document.getElementById("notes").value = settings.notes || "";
 
-    this.tempInput.value=settings.temperature;
-    this.tempUnitSelect.value=settings.tempUnit;
+    // 2. Restaurer l'unité EN PREMIER
+    if (settings.units === "mm") {
+        document.getElementById("unitsMm").checked = true;
+        this.units = "mm";
+    } else {
+        document.getElementById("unitsInches").checked = true;
+        this.units = "inches";
+    }
 
-    this.boreDiameterInput.value=settings.boreDiameter;
-    this.wallThicknessInput.value=settings.wallThickness;
-    this.embouchureDiameterInput.value=settings.embouchureDiameter;
+    // 3. Température
+    this.tempInput.value = settings.temperature;
+    this.tempUnitSelect.value = settings.tempUnit;
 
-    this.keySelector.value=settings.key;
-    this.endFrequencyInput.value=settings.endFrequency;
+    // 4. Dimensions
+    this.boreDiameterInput.value = settings.boreDiameter;
+    this.wallThicknessInput.value = settings.wallThickness;
+    this.embouchureDiameterInput.value = settings.embouchureDiameter;
 
-    settings.frequencies.forEach((v,i)=>{
-        this.holeFrequencyInputs[i].value=v;
-    });
+    // 5. Tonalité et fréquences
+    this.keySelector.value = settings.key;
+    this.endFrequencyInput.value = settings.endFrequency;
 
-    settings.diameters.forEach((v,i)=>{
-        this.holeDiameterInputs[i].value=v;
-    });
+    if (settings.frequencies) {
+        settings.frequencies.forEach((v, i) => {
+            if (this.holeFrequencyInputs[i]) {
+                this.holeFrequencyInputs[i].value = v;
+            }
+        });
+    }
 
+    if (settings.diameters) {
+        settings.diameters.forEach((v, i) => {
+            if (this.holeDiameterInputs[i]) {
+                this.holeDiameterInputs[i].value = v;
+            }
+        });
+    }
+
+    // 6. Recalculer avec la bonne unité
+    this.calculateSpeedOfSound();
+    this.updateSpeedOfSoundDisplay();
     this.calculateAllPositions();
 }
 
