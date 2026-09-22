@@ -114,6 +114,72 @@ class FluteCalculator {
         /** @type {number} Calculated physical distance of the embouchure center from the open end. */
         this.embouchurePhysicalPosition = 0;
 
+        // Restaurer la dernière unité choisie
+        const savedUnits = localStorage.getItem('flutomat_units');
+        if (savedUnits === 'mm') {
+            document.getElementById('unitsMm').checked = true;
+            this.units = 'mm';
+        } else {
+            document.getElementById('unitsInches').checked = true;
+            this.units = 'inches';
+        }
+
+
+        // Restaurer les préférences
+        try {
+            const saved = localStorage.getItem('flutomat_prefs');
+            if (saved) {
+                const prefs = JSON.parse(saved);
+
+                if (prefs.units === 'mm') {
+                    document.getElementById('unitsMm').checked = true;
+                    this.units = 'mm';
+                } else {
+                    document.getElementById('unitsInches').checked = true;
+                    this.units = 'inches';
+                }
+
+                if (prefs.temperature) this.tempInput.value = prefs.temperature;
+                if (prefs.tempUnit) this.tempUnitSelect.value = prefs.tempUnit;
+                if (prefs.a4Frequency && this.a4FrequencyInput) {
+                    this.a4FrequencyInput.value = prefs.a4Frequency;
+                    this.A4_FREQUENCY_HZ = Number(prefs.a4Frequency) || 440;
+                }
+                if (prefs.key) this.keySelector.value = prefs.key;
+                if (prefs.intervalSequence) this.intervalSequenceInput.value = prefs.intervalSequence;
+                if (prefs.scalePreset && this.scalePresetSelect) {
+                    this.scalePresetSelect.value = prefs.scalePreset;
+                }
+
+                // Dimensions
+                if (prefs.boreDiameter) this.boreDiameterInput.value = prefs.boreDiameter;
+                if (prefs.wallThickness) this.wallThicknessInput.value = prefs.wallThickness;
+                if (prefs.embouchureDiameter) this.embouchureDiameterInput.value = prefs.embouchureDiameter;
+
+                // Trous
+                if (prefs.holeDiameters) {
+                    prefs.holeDiameters.forEach((val, i) => {
+                        if (this.holeDiameterInputs[i] && val) {
+                            this.holeDiameterInputs[i].value = val;
+                        }
+                    });
+                }
+
+                // Wedge Fajardo
+                if (this.fajardoWedgeCheckbox) {
+                    this.fajardoWedgeCheckbox.checked = !!prefs.fajardoWedge;
+                }
+                if (this.wedgeIntensityInput && prefs.wedgeIntensity) {
+                    this.wedgeIntensityInput.value = prefs.wedgeIntensity;
+                    if (this.wedgeValueDisplay) {
+                        this.wedgeValueDisplay.textContent = prefs.wedgeIntensity + ' %';
+                    }
+                }
+            }
+        } catch (e) {
+            console.warn("Impossible de restaurer les préférences", e);
+        }
+
         this._bindEvents();
         this.readInputsFromForm(); // Load initial values
         this.updateSpeedOfSoundDisplay(); // Show initial speed of sound
@@ -201,6 +267,7 @@ class FluteCalculator {
                     e.target.value = Number(this.boreDiameterInput.value - this.wallThickness);
                 }
                 this.calculateAllPositions();
+                    this.savePreferences();
             });
         });
         //this.keySelector.addEventListener('change', () => this.updateFrequenciesFromKey());
@@ -220,6 +287,7 @@ class FluteCalculator {
                 e.target.value = (Number(this.boreDiameterInput.value) - this.wallThickness);
             }
             this.calculateAllPositions();
+                this.savePreferences();
         });
         // Force all diameters to be errored if bore diameter is bigger than holes diameters.
         this.boreDiameterInput.addEventListener('change', (e) => {
@@ -249,6 +317,12 @@ class FluteCalculator {
             });
 
             this.calculateAllPositions();
+                this.savePreferences();
+        });
+
+        this.wallThicknessInput.addEventListener('change', () => {
+            this.calculateAllPositions();
+            this.savePreferences();
         });
 
         // Reset handling
@@ -285,7 +359,10 @@ class FluteCalculator {
         }
         // === Wedge de Fajardo ===
         if (this.fajardoWedgeCheckbox) {
-            this.fajardoWedgeCheckbox.addEventListener('change', () => this.calculateAllPositions());
+            this.fajardoWedgeCheckbox.addEventListener('change', () => {
+                this.calculateAllPositions();
+                this.savePreferences();
+            });
         }
         if (this.wedgeIntensityInput) {
             this.wedgeIntensityInput.addEventListener('input', (e) => {
@@ -293,20 +370,42 @@ class FluteCalculator {
                     this.wedgeValueDisplay.textContent = e.target.value + ' %';
                 }
                 this.calculateAllPositions();
+                this.savePreferences();
             });
         }
         // Bouton Écouter la gamme
         if (this.playScaleButton) {
             this.playScaleButton.addEventListener('click', () => this.playScale());
         }
+
+        this.keySelector.addEventListener('change', () => {
+            this.updateFrequenciesFromKey();
+            this.savePreferences();
+        });
+
+        this.intervalSequenceInput.addEventListener('change', () => {
+            this.updateFrequenciesFromKey();
+            this.savePreferences();
+        });
+
+        this.scalePresetSelect.addEventListener('change', () => {
+            const value = this.scalePresetSelect.value;
+            if (value) {
+                this.intervalSequenceInput.value = value;
+                this.updateFrequenciesFromKey();
+            }
+            this.savePreferences();
+        });
+
     }
 
     /** Handles changes in the temperature input or units. */
     _handleTemperatureChange() {
         this.readTemperatureInput();
         this.updateSpeedOfSoundDisplay();
+        this.savePreferences();
         // Maybe trigger recalculation or just update display
-        // this.calculateAllPositions(); // Uncomment to auto-recalculate
+        this.calculateAllPositions(); // Uncomment to auto-recalculate
     }
 
     /** Handles changes in the unit selection. */
@@ -317,6 +416,8 @@ class FluteCalculator {
         this.updateUnitsBasedInputs();
         // Potentially convert existing values if needed, or require re-input/recalc
         this.clearResults(); // Clear old results as they are likely invalid
+        localStorage.setItem('flutomat_units', this.units);
+        this.savePreferences();
     }
 
     updateUnitsBasedInputs() {
@@ -656,6 +757,32 @@ class FluteCalculator {
         } else {
             startPlaying();
         }
+    }
+
+    // Sauvegarde des préférences
+    savePreferences() {
+        const prefs = {
+            units: this.units,
+            temperature: this.tempInput.value,
+            tempUnit: this.tempUnitSelect.value,
+            a4Frequency: this.a4FrequencyInput?.value || "440",
+            key: this.keySelector.value,
+            intervalSequence: this.intervalSequenceInput?.value || "221222",
+            scalePreset: this.scalePresetSelect?.value || "",
+
+            // Dimensions
+            boreDiameter: this.boreDiameterInput.value,
+            wallThickness: this.wallThicknessInput.value,
+            embouchureDiameter: this.embouchureDiameterInput.value,
+
+            // Trous
+            holeDiameters: this.holeDiameterInputs.map(input => input?.value || ""),
+
+            // Wedge Fajardo
+            fajardoWedge: this.fajardoWedgeCheckbox?.checked || false,
+            wedgeIntensity: this.wedgeIntensityInput?.value || "50"
+        };
+        localStorage.setItem('flutomat_prefs', JSON.stringify(prefs));
     }
 
     // --- Acoustic Calculation Functions (Ported and Renamed) ---
