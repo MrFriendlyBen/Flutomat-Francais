@@ -3,7 +3,43 @@
  * Calculates transverse flute finger hole and embouchure positions based on
  * acoustic principles, incorporating temperature-dependent speed of sound.
  */
-
+const MELODIES = {
+    blues: [
+        {d:1, dur:0.45}, {d:1, dur:0.22}, {d:4, dur:0.45}, {d:4, dur:0.22},
+        {d:5, dur:0.35}, {d:4, dur:0.25}, {d:1, dur:0.45}, {d:1, dur:0.30},
+        {d:5, dur:0.25}, {d:4, dur:0.35}, {d:1, dur:0.40}, {d:1, dur:0.25},
+        {d:4, dur:0.30}, {d:5, dur:0.35}, {d:4, dur:0.25}, {d:1, dur:0.50},
+        {d:1, dur:0.30}, {d:5, dur:0.25}, {d:4, dur:0.35}, {d:1, dur:0.60}
+    ],
+    folk: [
+        {d:1, dur:0.35}, {d:2, dur:0.35}, {d:3, dur:0.35}, {d:5, dur:0.50},
+        {d:5, dur:0.35}, {d:3, dur:0.35}, {d:2, dur:0.35}, {d:1, dur:0.50},
+        {d:5, dur:0.35}, {d:3, dur:0.35}, {d:2, dur:0.35}, {d:1, dur:0.45},
+        {d:2, dur:0.30}, {d:3, dur:0.35}, {d:5, dur:0.40}, {d:3, dur:0.35},
+        {d:2, dur:0.35}, {d:1, dur:0.40}, {d:5, dur:0.35}, {d:1, dur:0.55}
+    ],
+    orientale: [
+        {d:1, dur:0.40}, {d:2, dur:0.18}, {d:3, dur:0.40}, {d:1, dur:0.25},
+        {d:5, dur:0.45}, {d:3, dur:0.22}, {d:2, dur:0.30}, {d:1, dur:0.40},
+        {d:3, dur:0.20}, {d:5, dur:0.35}, {d:6, dur:0.45}, {d:5, dur:0.25},
+        {d:3, dur:0.30}, {d:2, dur:0.20}, {d:1, dur:0.40}, {d:3, dur:0.25},
+        {d:2, dur:0.30}, {d:1, dur:0.35}, {d:5, dur:0.40}, {d:1, dur:0.60}
+    ],
+    meditative: [
+        {d:1, dur:0.55}, {d:3, dur:0.50}, {d:5, dur:0.60}, {d:3, dur:0.45},
+        {d:1, dur:0.55}, {d:1, dur:0.40}, {d:5, dur:0.55}, {d:3, dur:0.50},
+        {d:1, dur:0.50}, {d:3, dur:0.45}, {d:5, dur:0.55}, {d:8, dur:0.70},
+        {d:5, dur:0.50}, {d:3, dur:0.45}, {d:1, dur:0.55}, {d:5, dur:0.50},
+        {d:3, dur:0.45}, {d:1, dur:0.50}, {d:3, dur:0.55}, {d:1, dur:0.75}
+    ],
+    danse: [
+        {d:1, dur:0.22}, {d:2, dur:0.22}, {d:3, dur:0.22}, {d:4, dur:0.22},
+        {d:5, dur:0.28}, {d:5, dur:0.22}, {d:4, dur:0.22}, {d:3, dur:0.22},
+        {d:2, dur:0.22}, {d:1, dur:0.30}, {d:5, dur:0.22}, {d:4, dur:0.22},
+        {d:3, dur:0.22}, {d:2, dur:0.22}, {d:1, dur:0.28}, {d:3, dur:0.22},
+        {d:5, dur:0.25}, {d:4, dur:0.22}, {d:2, dur:0.22}, {d:1, dur:0.45}
+    ]
+};
 /**
  * Represents and calculates flute dimensions.
  * @class
@@ -113,6 +149,7 @@ class FluteCalculator {
         this.embouchureAcousticX = 0;
         /** @type {number} Calculated physical distance of the embouchure center from the open end. */
         this.embouchurePhysicalPosition = 0;
+        this.pianoModeActive = false;
 
         // Restaurer la dernière unité choisie
         const savedUnits = localStorage.getItem('flutomat_units');
@@ -396,6 +433,49 @@ class FluteCalculator {
             }
             this.savePreferences();
         });
+        // Boutons de mélodies stylisées
+        document.querySelectorAll('.melody-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const style = btn.dataset.style;
+                this.playMelodyStyle(style);
+            });
+        });
+
+        // Mode clavier / piano
+        const pianoBtn = document.getElementById('pianoModeButton');
+        if (pianoBtn) {
+            pianoBtn.addEventListener('click', () => this.togglePianoMode());
+        }
+
+        // Touches physiques (PC)
+        document.addEventListener('keydown', (e) => {
+            if (!this.pianoModeActive) return;
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+
+            const key = e.key;
+            let degree = null;
+            if (key >= '1' && key <= '8') degree = parseInt(key, 10);
+            else if (key === '0') degree = 8;
+
+            if (degree) {
+                e.preventDefault();
+                this.playDegree(degree);
+            }
+        });
+
+        // Pavé tactile (Android / tablette)
+        document.querySelectorAll('.piano-key').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (!this.pianoModeActive) return;
+                const degree = parseInt(btn.dataset.degree, 10);
+                this.playDegree(degree);
+            });
+        });
+
+        // Après toute interaction dans le formulaire, reprendre le focus du clavier
+        this.form.addEventListener('change', () => {
+            this.refocusPianoPad();
+        });
 
     }
 
@@ -653,6 +733,161 @@ class FluteCalculator {
         }
     }
 
+    /** Construit la gamme actuelle (fréquences) selon tonalité + mode */
+    buildCurrentScale() {
+        const baseMidi = parseInt(this.keySelector.value, 10);
+        if (isNaN(baseMidi)) return [];
+
+        const sequenceStr = (this.intervalSequenceInput?.value || "221222").replace(/\s+/g, "");
+        const intervals = sequenceStr.split("").map(n => parseInt(n, 10)).filter(n => !isNaN(n) && n > 0);
+
+        const notesMidi = [baseMidi];
+        let current = baseMidi;
+        for (let i = 0; i < intervals.length; i++) {
+            current += intervals[i];
+            notesMidi.push(current);
+        }
+        notesMidi.push(baseMidi + 12); // octave
+
+        return notesMidi.map(midi => this.midiNoteToFrequency(midi));
+    }
+
+    /** Joue un degré (1–8) avec le son flûte */
+    playDegree(degree) {
+        const scale = this.buildCurrentScale();
+        if (!scale.length) return;
+
+        let index = Math.min(Math.max(degree, 1), 8) - 1;
+        if (index >= scale.length) index = scale.length - 1;
+
+        const freq = scale[index];
+        const audioCtx = this._pianoCtx || (this._pianoCtx = new (window.AudioContext || window.webkitAudioContext)());
+
+        if (audioCtx.state === "suspended") {
+            audioCtx.resume();
+        }
+
+        const startTime = audioCtx.currentTime;
+        const duration = 0.45;
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = "sine";
+        osc.frequency.value = freq;
+
+        const attack = 0.06;
+        const release = 0.10;
+
+        gain.gain.setValueAtTime(0.0001, startTime);
+        gain.gain.exponentialRampToValueAtTime(0.22, startTime + attack);
+        gain.gain.exponentialRampToValueAtTime(0.16, startTime + duration - release);
+        gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start(startTime);
+        osc.stop(startTime + duration + 0.03);
+    }
+
+    togglePianoMode() {
+        this.pianoModeActive = !this.pianoModeActive;
+        const pad = document.getElementById('pianoPad');
+        const status = document.getElementById('pianoModeStatus');
+
+        if (this.pianoModeActive) {
+            if (pad) {
+                pad.style.display = 'block';
+                pad.focus();   // ← important
+            }
+            if (status) status.textContent = 'Actif — jouez 1 à 8 (clavier ou pavé)';
+        } else {
+            if (pad) pad.style.display = 'none';
+            if (status) status.textContent = '';
+        }
+    }
+
+
+    playMelodyStyle(styleName) {
+        if (this.isPlayingScale) return;
+        this.isPlayingScale = true;
+
+        const baseMidi = parseInt(this.keySelector.value, 10);
+        if (isNaN(baseMidi)) {
+            this.isPlayingScale = false;
+            return;
+        }
+
+        // Construire la gamme actuelle
+        const sequenceStr = (this.intervalSequenceInput?.value || "221222").replace(/\s+/g, "");
+        const intervals = sequenceStr.split("").map(n => parseInt(n, 10)).filter(n => !isNaN(n) && n > 0);
+
+        const notesMidi = [baseMidi];
+        let current = baseMidi;
+        for (let i = 0; i < intervals.length; i++) {
+            current += intervals[i];
+            notesMidi.push(current);
+        }
+        notesMidi.push(baseMidi + 12); // octave
+
+        const scale = notesMidi.map(midi => this.midiNoteToFrequency(midi));
+        const pattern = MELODIES[styleName] || MELODIES.folk;
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        const startPlaying = () => {
+            let time = audioCtx.currentTime + 0.08;
+            const gap = 0.01;   // petit silence doux entre les notes (évite les clics)
+
+            const playNote = (freq, startTime, duration) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+
+                osc.type = "sine";
+                osc.frequency.value = freq;
+
+                const attack = Math.min(0.06, duration * 0.25);
+                const release = Math.min(0.08, duration * 0.35);
+                const sustainEnd = startTime + duration - release;
+
+                // Envelope douce (pas de saut de volume)
+                gain.gain.setValueAtTime(0.0001, startTime);
+                gain.gain.exponentialRampToValueAtTime(0.22, startTime + attack);
+                gain.gain.exponentialRampToValueAtTime(0.18, Math.max(startTime + attack, sustainEnd));
+                gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start(startTime);
+                // Arrêt après que le volume soit déjà quasi à zéro
+                osc.stop(startTime + duration + 0.03);
+            };
+
+            pattern.forEach(note => {
+                let index = Math.min(note.d - 1, scale.length - 1);
+                if (index < 0) index = 0;
+                playNote(scale[index], time, note.dur);
+                time += note.dur + gap;
+            });
+
+            const totalDuration = (time - audioCtx.currentTime) * 1000 + 400;
+            setTimeout(() => {
+                this.isPlayingScale = false;
+                audioCtx.close();
+            }, totalDuration);
+        };
+
+        if (audioCtx.state === "suspended") {
+            audioCtx.resume().then(startPlaying).catch(() => {
+                this.isPlayingScale = false;
+            });
+        } else {
+            startPlaying();
+        }
+    }
+
     playScale() {
         if (this.isPlayingScale) return;
         this.isPlayingScale = true;
@@ -756,6 +991,15 @@ class FluteCalculator {
             });
         } else {
             startPlaying();
+        }
+    }
+
+    refocusPianoPad() {
+        if (!this.pianoModeActive) return;
+        const pad = document.getElementById('pianoPad');
+        if (pad && pad.style.display !== 'none') {
+            // léger délai pour laisser le navigateur finir le changement de champ
+            setTimeout(() => pad.focus(), 0);
         }
     }
 

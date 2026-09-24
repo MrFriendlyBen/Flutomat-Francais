@@ -311,3 +311,71 @@ form {
         font-size: 0.9em;
     }
 }
+
+/* --- Mode clavier / piano --- */
+#pianoModeButton {
+    background: linear-gradient(180deg, #6d4c41, #4e342e);
+    color: #efd9b8;
+    border: 1px solid #3e2723;
+    border-radius: 6px;
+    padding: 8px 14px;
+    cursor: pointer;
+    font-size: 0.95em;
+}
+
+#pianoModeButton:hover {
+    background: linear-gradient(180deg, #8d6e63, #5d4037);
+}
+
+#pianoModeStatus {
+    color: #c8e6c9;
+    font-size: 0.9em;
+}
+
+#pianoPad {
+    margin-top: 12px;
+    padding: 12px;
+    background: rgba(44, 30, 26, 0.85);
+    border: 1px solid #6d4c41;
+    border-radius: 10px;
+    max-width: 300px;
+}
+
+#pianoPad .piano-key {
+    aspect-ratio: 1;
+    min-height: 48px;
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #3e2723;
+    background: linear-gradient(180deg, #efd9b8, #d7ccc8);
+    border: 1px solid #8d6e63;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 3px 0 #5d4037;
+    transition: transform 0.05s, box-shadow 0.05s, background 0.1s;
+}
+
+#pianoPad .piano-key:hover {
+    background: linear-gradient(180deg, #fff8e1, #efd9b8);
+}
+
+#pianoPad .piano-key:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 #5d4037;
+    background: linear-gradient(180deg, #ffe082, #ffcc80);
+}
+
+/* Touche octave (8 et 0) un peu distincte */
+#pianoPad .piano-key[data-degree="8"] {
+    background: linear-gradient(180deg, #a5d6a7, #81c784);
+    color: #1b5e20;
+}
+
+#pianoPad .piano-key[data-degree="8"]:hover {
+    background: linear-gradient(180deg, #c8e6c9, #a5d6a7);
+}
+
+#pianoPad:focus {
+    outline: 2px solid #81c784;
+    outline-offset: 2px;
+}

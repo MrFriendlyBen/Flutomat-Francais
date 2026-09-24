@@ -5,6 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flutomat-Calculateur de flûte</title>
+    
+    <!-- Icône de l'onglet -->
+    <link rel="icon" type="image/png" href="icons8-flute-94.png">
+    
     <link rel="stylesheet" href="flutomat.css">
 </head>
 
@@ -137,8 +141,39 @@
                     <label for="intervalSequence">Intervalles; nombre de demi-tons entre chaque note (ex: 221222 diatonique majeure ou 32232 pentatonique mineure etc. ou personnalisé)</label>
                     <br>
                     <input type="text" id="intervalSequence" value="221222" placeholder="221222" size="15">
-                    <button type="button" id="playScaleButton" style="margin-left: 8px;">▶ Écouter</button>
+                    <!--<button type="button" id="playScaleButton" style="margin-left: 8px;">▶ Écouter</button>-->
                 </div>
+                <div style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px;">
+                    <button type="button" class="melody-btn" data-style="blues">▶ Blues</button>
+                    <button type="button" class="melody-btn" data-style="folk">▶ Folk</button>
+                    <button type="button" class="melody-btn" data-style="orientale">▶ Orientale</button>
+                    <button type="button" class="melody-btn" data-style="meditative">▶ Méditative</button>
+                    <button type="button" class="melody-btn" data-style="danse">▶ Danse</button>
+                </div>
+
+                <div style="margin-top: 12px;">
+                    <button type="button" id="pianoModeButton">🎹 Mode clavier</button>
+                    <span id="pianoModeStatus" style="margin-left: 8px; opacity: 0.8;"></span>
+                </div>
+
+                <!-- Pavé pour tablette / téléphone -->
+                <div id="pianoPad" tabindex="0" style="display: none; margin-top: 10px; max-width: 280px;">
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;">
+                        <button type="button" class="piano-key" data-degree="1">1</button>
+                        <button type="button" class="piano-key" data-degree="2">2</button>
+                        <button type="button" class="piano-key" data-degree="3">3</button>
+                        <button type="button" class="piano-key" data-degree="4">4</button>
+                        <button type="button" class="piano-key" data-degree="5">5</button>
+                        <button type="button" class="piano-key" data-degree="6">6</button>
+                        <button type="button" class="piano-key" data-degree="7">7</button>
+                        <button type="button" class="piano-key" data-degree="8">8</button>
+                        <button type="button" class="piano-key" data-degree="8">0</button>
+                    </div>
+                    <p style="font-size: 0.8em; opacity: 0.75; margin-top: 6px;">
+                        Touches 1–8 (ou 0) = degrés de la gamme choisie
+                    </p>
+                </div>
+
             </div>
 
             <table>
