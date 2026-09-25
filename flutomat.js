@@ -5,11 +5,15 @@
  */
 const MELODIES = {
     blues: [
-        {d:1, dur:0.45}, {d:1, dur:0.22}, {d:4, dur:0.45}, {d:4, dur:0.22},
-        {d:5, dur:0.35}, {d:4, dur:0.25}, {d:1, dur:0.45}, {d:1, dur:0.30},
-        {d:5, dur:0.25}, {d:4, dur:0.35}, {d:1, dur:0.40}, {d:1, dur:0.25},
-        {d:4, dur:0.30}, {d:5, dur:0.35}, {d:4, dur:0.25}, {d:1, dur:0.50},
-        {d:1, dur:0.30}, {d:5, dur:0.25}, {d:4, dur:0.35}, {d:1, dur:0.60}
+        {d:1, dur:0.19}, {d:2, dur:0.46}, {d:3, dur:0.14}, {d:4, dur:0.46},
+        {d:5, dur:0.19}, {d:4, dur:0.38}, {d:6, dur:0.27}, {d:5, dur:0.21},
+        {d:4, dur:0.22}, {d:3, dur:0.26}, {d:2, dur:0.27}, {d:1, dur:0.24},
+        {d:2, dur:0.30}, {d:3, dur:0.19}, {d:4, dur:0.48}, {d:3, dur:0.24},
+        {d:2, dur:0.48}, {d:1, dur:0.34}, {d:2, dur:0.61}, {d:4, dur:0.22},
+        {d:5, dur:0.13}, {d:6, dur:0.30}, {d:7, dur:0.29}, {d:6, dur:0.29},
+        {d:5, dur:0.29}, {d:4, dur:0.30}, {d:3, dur:0.32}, {d:2, dur:0.29},
+        {d:1, dur:0.35}, {d:2, dur:0.27}, {d:3, dur:0.35}, {d:4, dur:0.29},
+        {d:3, dur:0.62}, {d:2, dur:0.30}, {d:1, dur:0.51}, {d:1, dur:0.74}
     ],
     folk: [
         {d:1, dur:0.35}, {d:2, dur:0.35}, {d:3, dur:0.35}, {d:5, dur:0.50},
@@ -451,24 +455,49 @@ class FluteCalculator {
         document.addEventListener('keydown', (e) => {
             if (!this.pianoModeActive) return;
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+            if (e.repeat) return; // ignore la répétition auto Windows
 
-            const key = e.key;
             let degree = null;
-            if (key >= '1' && key <= '8') degree = parseInt(key, 10);
-            else if (key === '0') degree = 8;
+            if (e.key >= '1' && e.key <= '8') degree = parseInt(e.key, 10);
+            else if (e.key === '0') degree = 8;
 
             if (degree) {
                 e.preventDefault();
-                this.playDegree(degree);
+                this.startDegree(degree);
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            if (!this.pianoModeActive) return;
+
+            let degree = null;
+            if (e.key >= '1' && e.key <= '8') degree = parseInt(e.key, 10);
+            else if (e.key === '0') degree = 8;
+
+            if (degree) {
+                e.preventDefault();
+                this.stopDegree(degree);
             }
         });
 
         // Pavé tactile (Android / tablette)
         document.querySelectorAll('.piano-key').forEach(btn => {
-            btn.addEventListener('click', () => {
+            const degree = parseInt(btn.dataset.degree, 10);
+
+            btn.addEventListener('pointerdown', (e) => {
                 if (!this.pianoModeActive) return;
-                const degree = parseInt(btn.dataset.degree, 10);
-                this.playDegree(degree);
+                e.preventDefault();
+                btn.setPointerCapture(e.pointerId);
+                this.startDegree(degree);
+            });
+
+            btn.addEventListener('pointerup', (e) => {
+                if (!this.pianoModeActive) return;
+                this.stopDegree(degree);
+            });
+
+            btn.addEventListener('pointercancel', () => {
+                this.stopDegree(degree);
             });
         });
 
@@ -789,6 +818,66 @@ class FluteCalculator {
 
         osc.start(startTime);
         osc.stop(startTime + duration + 0.03);
+    }
+
+    ensurePianoContext() {
+        if (!this._pianoCtx) {
+            this._pianoCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (this._pianoCtx.state === "suspended") {
+            this._pianoCtx.resume();
+        }
+        if (!this._activeNotes) this._activeNotes = {};
+        return this._pianoCtx;
+    }
+
+    /** Démarre une note (appui) */
+    startDegree(degree) {
+        const scale = this.buildCurrentScale();
+        if (!scale.length) return;
+
+        let index = Math.min(Math.max(degree, 1), 8) - 1;
+        if (index >= scale.length) index = scale.length - 1;
+
+        // Déjà en cours pour ce degré → ne pas relancer (évite le key-repeat)
+        if (this._activeNotes && this._activeNotes[degree]) return;
+
+        const audioCtx = this.ensurePianoContext();
+        const freq = scale[index];
+        const startTime = audioCtx.currentTime;
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = "sine";
+        osc.frequency.value = freq;
+
+        // Attaque très rapide (réponse immédiate)
+        gain.gain.setValueAtTime(0.0001, startTime);
+        gain.gain.exponentialRampToValueAtTime(0.22, startTime + 0.015);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(startTime);
+
+        this._activeNotes[degree] = { osc, gain };
+    }
+
+    /** Arrête une note (relâchement) */
+    stopDegree(degree) {
+        if (!this._activeNotes || !this._activeNotes[degree]) return;
+
+        const { osc, gain } = this._activeNotes[degree];
+        const audioCtx = this._pianoCtx;
+        const now = audioCtx.currentTime;
+
+        // Relâchement court mais propre (sans clic)
+        gain.gain.cancelScheduledValues(now);
+        gain.gain.setValueAtTime(Math.max(gain.gain.value, 0.0001), now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.08);
+
+        osc.stop(now + 0.1);
+        delete this._activeNotes[degree];
     }
 
     togglePianoMode() {
