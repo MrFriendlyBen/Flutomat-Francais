@@ -1,7 +1,10 @@
 /**
- * @fileoverview Flutomat NG - Modernized Flute Calculator
- * Calculates transverse flute finger hole and embouchure positions based on
- * acoustic principles, incorporating temperature-dependent speed of sound.
+ * @fileoverview Flutomat Français - 
+ * Adaptation et modernisation en français du calculateur de flûte Flutomat.
+ * Calcul la position des trous et de l'embouchure d'une flûte traversière,
+ * ainsi que l'effet d'un wedge de Fajardo sur la position de l'embouchure.
+ * Donne aussi des indicateurs de facilité à atteindre la 2ième octave,
+ * selon un calcul sur la frequence de coupure s'ajustant selon la grosseur des trous.
  */
 const MELODIES = {
     blues: [
@@ -23,11 +26,12 @@ const MELODIES = {
         {d:2, dur:0.35}, {d:1, dur:0.40}, {d:5, dur:0.35}, {d:1, dur:0.55}
     ],
     orientale: [
-        {d:1, dur:0.40}, {d:2, dur:0.18}, {d:3, dur:0.40}, {d:1, dur:0.25},
-        {d:5, dur:0.45}, {d:3, dur:0.22}, {d:2, dur:0.30}, {d:1, dur:0.40},
-        {d:3, dur:0.20}, {d:5, dur:0.35}, {d:6, dur:0.45}, {d:5, dur:0.25},
+        {d:1, dur:0.40}, {d:3, dur:0.18}, {d:5, dur:0.40}, {d:6, dur:0.25},
+        {d:5, dur:0.60}, {d:4, dur:0.22}, {d:2, dur:0.30}, {d:1, dur:0.40},
+        {d:4, dur:0.20}, {d:5, dur:0.35}, {d:6, dur:0.45}, {d:5, dur:0.25},
         {d:3, dur:0.30}, {d:2, dur:0.20}, {d:1, dur:0.40}, {d:3, dur:0.25},
-        {d:2, dur:0.30}, {d:1, dur:0.35}, {d:5, dur:0.40}, {d:1, dur:0.60}
+        {d:2, dur:0.30}, {d:1, dur:0.35}, {d:5, dur:0.60}, {d:4, dur:0.40},
+        {d:2, dur:0.20}, {d:1, dur:0.60}
     ],
     pattern1: [
         {d:1, dur:0.22}, {d:2, dur:0.22}, {d:3, dur:0.22}, {d:4, dur:0.22},
@@ -72,7 +76,7 @@ class FluteCalculator {
         this.A4_FREQUENCY_HZ = 440.0;
 		//this.A4_FREQUENCY_HZ = Number(this.a4FrequencyInput?.value) || 440.0;
         /** @const {number[]} Major scale intervals in semitones relative to root [Root, M2, M3, P4, P5, M6, M7]. */
-        this.MAJOR_SCALE_INTERVALS = [0, 2, 4, 5, 7, 9, 11]; // Used for Fend, Hole1..6
+        this.MAJOR_SCALE_INTERVALS = [0, 2, 4, 5, 7, 9, 11]; // Used for Fond, Hole1..6
 
         // --- DOM Element References ---
         this.form = document.getElementById('fluteForm');
