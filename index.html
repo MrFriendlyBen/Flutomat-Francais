@@ -118,6 +118,7 @@
                 <select id="scalePreset">
                     <option value="">— Personnalisé —</option>
                     <option value="221222">Majeure diatonique</option>
+                    <option value="1121222">Majeure 7 trous Simple système</option>
                     <option value="212221">Mineure naturelle</option>
                     <option value="32232">Pentatonique mineure (Amérindienne)</option>
                     <option value="22323">Pentatonique majeure</option>
@@ -205,6 +206,33 @@
                     </tr>
                     <!-- Finger Holes (Generate dynamically or list explicitly) -->
                     <!-- Example for 6 holes -->
+                    <tr class="hole-row" data-hole-index="6">
+                        <td>Trou 7</td>
+                        <td><output id="note7"></output></td>
+                        <td><input type="number" name="holeFrequency" id="freq7" value="587.33" step="any" required></td>
+                        <td><input type="text" name="holeDiameter" id="diam7" min="0.2" value="3/8" step="any" required></td>
+                        <td style="display:none"><output name="resultHole" id="result7"></output></td>
+                        <td><output id="result7Fraction"></output></td>
+                        <td class="gauge-cell">
+                            <div class="harmonic-gauge" data-position="4">
+                                <svg viewBox="0 0 60 60" width="54" height="54">
+                                    <circle cx="30" cy="30" r="28" fill="#2c1e1a" stroke="#6d4c41" stroke-width="2"/>
+                                    <path class="color-band" d="M 8,30 A 22,22 0 0,1 52,30"
+                                        fill="none" stroke="url(#gaugeGradient6)" stroke-width="6" stroke-linecap="round"/>
+                                    <defs>
+                                        <linearGradient id="gaugeGradient6" x1="0%" y1="0%" x2="100%" y2="0%">
+                                            <stop offset="0%" stop-color="#f9a825"/>
+                                            <stop offset="50%" stop-color="#43a047"/>
+                                            <stop offset="100%" stop-color="#c62828"/>
+                                        </linearGradient>
+                                    </defs>
+                                    <line class="needle" x1="30" y1="30" x2="30" y2="10"
+                                        stroke="#efd9b8" stroke-width="2.5" stroke-linecap="round"/>
+                                    <circle cx="30" cy="30" r="3.5" fill="#a1887f" stroke="#5d4037" stroke-width="1"/>
+                                </svg>
+                            </div>
+                        </td>
+                    </tr>
                     <tr class="hole-row" data-hole-index="5">
                         <td>Trou 6</td>
                         <td><output id="note6"></output></td>

@@ -59,7 +59,7 @@ class FluteCalculator {
      */
     constructor() {
         /** @const {number} Number of finger holes (fixed in this implementation) */
-        this.HOLE_COUNT = 6;
+        this.HOLE_COUNT = 7;
         this.activeHoleCount = 6;
 
         /** @const {number} Standard conversion */
@@ -747,7 +747,7 @@ class FluteCalculator {
             }
         }
 
-        this.activeHoleCount = intervals.length;
+        this.activeHoleCount = Math.min(intervals.length, this.HOLE_COUNT);
 
         this.updateVisibleHoles();
 
@@ -1476,6 +1476,22 @@ class FluteCalculator {
             return false;
         }
 
+        // Fréquences strictement croissantes (trou 1 → trou N)
+        for (let i = 0; i < this.activeHoleCount; i++) {
+            const f = this.holes[i].frequency;
+            if (isNaN(f) || f <= 0) {
+                console.error(`Trou ${i + 1}: fréquence invalide`, f);
+                return false;
+            }
+            if (i > 0 && f <= this.holes[i - 1].frequency) {
+                console.error(
+                    `Trou ${i + 1}: fréquence (${f}) doit être > trou ${i} (${this.holes[i - 1].frequency})`
+                );
+                this.holeFrequencyInputs[i].style.borderColor = 'red';
+                return false;
+            }
+        }
+
         // 0. Preliminary calculations and validation
         let closedHoleCorrections = [];
         for (let i = 0; i < this.activeHoleCount; i++) {
@@ -1631,6 +1647,30 @@ class FluteCalculator {
             if (isNaN(this.holes[i].physicalPosition)) {
                 console.error(`Calculation failed: Physical position for hole ${i + 1} is NaN.`);
                 return false; // Stop if any calculation fails
+            }
+        }
+
+        for (let i = 0; i < this.activeHoleCount; i++) {
+            const pos = this.holes[i].physicalPosition;
+            const ac = this.holes[i].acousticPosition;
+
+            // Position acoustique doit être positive et < position du trou précédent (plus grave)
+            if (ac <= 0 || (i > 0 && ac >= this.holes[i - 1].acousticPosition)) {
+                console.error(`Trou ${i + 1}: position acoustique incohérente`, { ac, prev: i > 0 ? this.holes[i - 1].acousticPosition : null });
+                this.holeDiameterInputs[i].style.borderColor = 'red';
+                return false;
+            }
+
+            // Distance physique : entre 0 et un peu plus que la longueur acoustique
+            if (pos < 0 || pos > this.acousticEndX * 1.2) {
+                console.error(`Trou ${i + 1}: position physique hors limites`, {
+                    pos,
+                    acousticEndX: this.acousticEndX,
+                    freq: this.holes[i].frequency,
+                    diam: this.holes[i].diameter
+                });
+                this.holeDiameterInputs[i].style.borderColor = 'red';
+                return false;
             }
         }
 
@@ -1887,7 +1927,8 @@ class FluteCalculator {
             );
 
             // Trous
-            for (let i = 0; i < this.HOLE_COUNT; i++) {
+            for (let i = 0; i < this.activeHoleCount; i++) {
+                if (!this.holeResultOutputs[i]) continue;
                 const length = this.formatDistance(Number(this.holeResultOutputs[i].value));
                 const diameter = this.formatDistance(this.parseFraction(this.holeDiameterInputs[i].value));
 
@@ -1919,10 +1960,11 @@ class FluteCalculator {
             context.strokeStyle = 'black';
             context.lineWidth = 1;
 
-            for (let i = 0; i < this.HOLE_COUNT; i++) {
-                const distanceFromEnd = this.holeResultOutputs[i].value * displayRatio;
+            for (let i = 0; i < this.activeHoleCount; i++) {
+                if (!this.holeResultOutputs[i] || !this.holeDiameterInputs[i]) continue;
+                const distanceFromEnd = Number(this.holeResultOutputs[i].value) * displayRatio;
+                if (isNaN(distanceFromEnd)) continue;
                 const xPosition = fluteEndX - distanceFromEnd;
-                //const holeRadius = this.holeDiameterInputs[i].value * displayRatio / 2;
                 const holeRadius = this.parseFraction(this.holeDiameterInputs[i].value) * displayRatio / 2;
                 context.beginPath();
                 context.arc(xPosition, centerFluteY, holeRadius, 0, Math.PI * 2);
@@ -1959,14 +2001,13 @@ class FluteCalculator {
 
             context.lineWidth = 1;
 
-            //for (let i = 0; i < this.HOLE_COUNT; i++) {
-            //    drawHole(this.holeResultOutputs[i].value, this.holeDiameterInputs[i].value);
-            //}
-            //drawHole(this.resultEmbouchureOutput.value, this.embouchureDiameter);
-            for (let i = 0; i < this.HOLE_COUNT; i++) {
-                drawHole(this.holeResultOutputs[i].value, this.parseFraction(this.holeDiameterInputs[i].value));
+            for (let i = 0; i < this.activeHoleCount; i++) {
+                if (!this.holeResultOutputs[i] || !this.holeDiameterInputs[i]) continue;
+                const pos = Number(this.holeResultOutputs[i].value);
+                if (isNaN(pos)) continue;
+                drawHole(pos, this.parseFraction(this.holeDiameterInputs[i].value));
             }
-            drawHole(this.resultEmbouchureOutput.value, this.embouchureDiameter);
+            drawHole(this.resultEmbouchureOutput.value, this.embouchureDiameter);            
         }
     }
 
