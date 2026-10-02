@@ -117,26 +117,57 @@
                 <label for="scalePreset">Mode / Gamme :</label>
                 <select id="scalePreset">
                     <option value="">— Personnalisé —</option>
-                    <option value="221222">Majeure diatonique</option>
-                    <option value="1121222">Majeure 7 trous Simple système</option>
-                    <option value="212221">Mineure naturelle</option>
-                    <option value="32232">Pentatonique mineure (Amérindienne)</option>
-                    <option value="22323">Pentatonique majeure</option>
-                    <option value="321132">Blues 6 trous</option>
-                    <option value="32223">Blues 5 trous</option>
-                    <option value="33132">Blues mineure</option>
-                    <option value="32322">Man Gong</option>
-                    <option value="23223">Pentatonique Écossaise</option>
-                    <option value="23232">Pentatonique égyptienne</option>
-                    <option value="22332">Pentatonique japonaise (Yo)</option>
-                    <option value="13232">Pentatonique japonaise (In)</option>
-                    <option value="21313">Hirajoshi</option>
-                    <option value="42141">Iwato</option>
-                    <option value="32121">Kumoi</option>
-                    <option value="12414">Balinaise</option>
-                    <option value="13113">Pelod (Balinaise)</option>
-                    <option value="22222">Équidistante (5 tons)</option>
-                    <option value="3333">Tétracorde</option>
+
+                    <optgroup label="Diatoniques">
+                        <option value="2212221">Majeure diatonique (7 trous)</option>
+                        <option value="221222">Majeure 6 trous Simple système</option>
+                        <option value="1121222">Majeure 7 trous Simple système</option>
+                        <option value="212221">Mineure naturelle</option>
+                        <option value="212212">Mineure harmonique</option>
+                        <option value="212222">Mineure mélodique</option>
+                    </optgroup>
+
+                    <optgroup label="Amérindienne / Blues">
+                        <option value="32232">Pentatonique mineure (Amérindienne 5)</option>
+                        <option value="212232">Amérindienne + 2 (couleur)</option>
+                        <option value="322212">Amérindienne + 6 (couleur)</option>
+                        <option value="321132">Blues 6 trous</option>
+                        <option value="32223">Blues 5 trous</option>
+                        <option value="33132">Blues mineure</option>
+                        <option value="321232">Blues + 6 (couleur)</option>
+                    </optgroup>
+
+                    <optgroup label="Pentatoniques majeures & Tunisie">
+                        <option value="22323">Pentatonique majeure</option>
+                        <option value="221223">Penta majeure + 4 (couleur)</option>
+                        <option value="223221">Penta majeure + 7 (couleur)</option>
+                        <option value="22323">Pentatonique (raṣd / Tunisie)</option>
+                        <option value="221223">Tunisienne + 4 (couleur)</option>
+                        <option value="223221">Tunisienne + 7 (couleur)</option>
+                    </optgroup>
+
+                    <optgroup label="Monde">
+                        <option value="32322">Man Gong</option>
+                        <option value="23223">Pentatonique écossaise</option>
+                        <option value="23232">Pentatonique égyptienne</option>
+                        <option value="22332">Pentatonique japonaise (Yo)</option>
+                        <option value="13232">Pentatonique japonaise (In)</option>
+                        <option value="21313">Hirajoshi</option>
+                        <option value="42141">Iwato</option>
+                        <option value="32121">Kumoi</option>
+                        <option value="12414">Balinaise</option>
+                        <option value="13113">Pelog (Balinaise)</option>
+                        <option value="22222">Équidistante (5 tons)</option>
+                        <option value="3333">Tétracorde</option>
+                    </optgroup>
+
+                    <optgroup label="Autres">
+                        <option value="22123">Mixolydien sans 7 (5 trous)</option>
+                        <option value="21232">Dorien sans 6 (5 trous)</option>
+                        <option value="32122">Mineure penta + 2</option>
+                        <option value="23212">Écossaise + 4 (couleur)</option>
+                        <option value="1312122">Phrygien dominant</option>
+                    </optgroup>
                 </select>
                 </div>
                     <label for="intervalSequence">Intervalles; nombre de demi-tons entre chaque note (ex: 221222 diatonique majeure ou 32232 pentatonique mineure etc. ou personnalisé)</label>
@@ -145,11 +176,11 @@
                     <!--<button type="button" id="playScaleButton" style="margin-left: 8px;">▶ Écouter</button>-->
                 </div>
                     <div style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px;">
-                    <!--<button type="button" class="melody-btn" data-style="blues">▶ Blues</button>
-                    <button type="button" class="melody-btn" data-style="folk">▶ Folk</button>-->
-                    <button type="button" class="melody-btn" data-style="orientale">▶ Orientale</button>
-                    <button type="button" class="melody-btn" data-style="pattern1">▶ 6 trous</button>
+                    <!--<button type="button" class="melody-btn" data-style="patternOriental1">▶ Orientale 1</button>
+                    <button type="button" class="melody-btn" data-style="patternOriental2">▶ Orientale 2</button>-->
                     <button type="button" class="melody-btn" data-style="pattern2">▶ 5 trous</button>
+                    <button type="button" class="melody-btn" data-style="pattern1">▶ 6 trous</button>
+                    <button type="button" class="melody-btn" data-style="pattern0">▶ 7 trous</button>
                 </div>
 
                 <div style="margin-top: 12px;">
