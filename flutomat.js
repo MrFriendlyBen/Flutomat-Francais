@@ -7,13 +7,13 @@
  * selon un calcul sur la frequence de coupure s'ajustant selon la grosseur des trous.
  */
 const MELODIES = {
-    pattern0: [
+    pattern7: [
         {d:1, dur:0.22}, {d:2, dur:0.22}, {d:3, dur:0.22}, {d:4, dur:0.22},
-        {d:5, dur:0.22}, {d:6, dur:0.22}, {d:7, dur:0.22}, {d:4, dur:0.22},
+        {d:5, dur:0.22}, {d:6, dur:0.22}, {d:7, dur:0.22}, {d:8, dur:0.22},
         {d:3, dur:0.22}, {d:4, dur:0.22}, {d:3, dur:0.22}, {d:4, dur:0.22},
-        {d:3, dur:0.22}, {d:2, dur:0.22}, {d:7, dur:0.22}, {d:6, dur:0.22},
-        {d:5, dur:0.22}, {d:4, dur:0.22}, {d:3, dur:0.22}, {d:2, dur:0.22},
-        {d:1, dur:0.60}
+        {d:8, dur:0.22}, {d:7, dur:0.22}, {d:6, dur:0.22}, {d:5, dur:0.22},
+        {d:4, dur:0.22}, {d:3, dur:0.22}, {d:2, dur:0.22}, {d:3, dur:0.22},
+        {d:2, dur:0.22}, {d:1, dur:0.60}
     ],
     patternOriental1: [
         {d:1, dur:0.22},
@@ -84,19 +84,19 @@ const MELODIES = {
         {d:2, dur:0.18},
         {d:1, dur:0.75}
     ],
-    pattern1: [
+    pattern6: [
+        {d:1, dur:0.22}, {d:2, dur:0.22}, {d:3, dur:0.22}, {d:4, dur:0.22},
+        {d:5, dur:0.22}, {d:6, dur:0.22}, {d:7, dur:0.22}, {d:6, dur:0.22},
+        {d:5, dur:0.22}, {d:4, dur:0.22}, {d:3, dur:0.22}, {d:4, dur:0.22},
+        {d:3, dur:0.22}, {d:2, dur:0.22}, {d:7, dur:0.22}, {d:5, dur:0.22},
+        {d:3, dur:0.22}, {d:2, dur:0.22}, {d:1, dur:0.75}
+    ],
+    pattern5: [
         {d:1, dur:0.22}, {d:2, dur:0.22}, {d:3, dur:0.22}, {d:4, dur:0.22},
         {d:5, dur:0.22}, {d:6, dur:0.22}, {d:5, dur:0.22}, {d:4, dur:0.22},
-        {d:5, dur:0.22}, {d:4, dur:0.22}, {d:3, dur:0.22}, {d:4, dur:0.22},
-        {d:3, dur:0.22}, {d:2, dur:0.22}, {d:3, dur:0.22}, {d:2, dur:0.22},
-        {d:1, dur:0.22}, {d:2, dur:0.22}, {d:1, dur:0.75}
-    ],
-    pattern2: [
-        {d:1, dur:0.22}, {d:2, dur:0.22}, {d:3, dur:0.22}, {d:4, dur:0.22},
-        {d:5, dur:0.22}, {d:4, dur:0.22}, {d:5, dur:0.22}, {d:4, dur:0.22},
         {d:3, dur:0.22}, {d:4, dur:0.22}, {d:3, dur:0.22}, {d:4, dur:0.22},
-        {d:3, dur:0.22}, {d:2, dur:0.22}, {d:3, dur:0.22}, {d:2, dur:0.22},
-        {d:5, dur:0.22}, {d:4, dur:0.22}, {d:3, dur:0.22}, {d:2, dur:0.22},
+        {d:3, dur:0.22}, {d:2, dur:0.22}, {d:3, dur:0.22}, {d:4, dur:0.22},
+        {d:5, dur:0.22}, {d:6, dur:0.22}, {d:3, dur:0.22}, {d:2, dur:0.22},
         {d:1, dur:0.60}
     ]
 };
