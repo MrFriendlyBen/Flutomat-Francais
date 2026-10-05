@@ -7,22 +7,26 @@ Version en ligne: https://mrfriendlyben.github.io/Flutomat-Francais/
 
 - Calcul des positions basé sur le modèle acoustique de Benade
 - Support des gammes personnalisées et modes pentatoniques du monde
-- Saisie des diamètres en fractions (ex. : 3/8, 5/16)
+- Saisie des diamètres en mm ou en pouces fractionnels (ex. : 3/8, 5/16)
 - Réglage de la fréquence de référence (A4 = 440 Hz, 432 Hz ou autre)
-- Affichage des distances en fractions (32ᵉ de pouce)
+- Affichage des distances en mm ou en pouces fractionnels (32ᵉ de pouce)
+- Sélection de modes et gammes du monde
+- Sélection du tempérament
 - Sauvegarde et chargement de configurations
 - Calcul de l'effet d'un wedge de Fajardo sur la position de l'embouchure (aide à la conception)
 - Indicateur de 2ième octave, donne un aperçu de la facilité d'atteindre l'harmonique en gardant un bon timbre. (À ne pas prendre comme objectif absolu à atteindre mais comme aide à la conception)
-- Impression du schéma et du rapport
+- Impression du schéma grandeur nature sur plusieurs page à assembler et apposer sur la flûte pour trouver le centre des trous
+- Impression d'un rapport à garder comme archive pour reproduire telle ou telle flûte
 - Interface adaptée au français
 
 ## Utilisation
 
 1. Les unités en pouces ou en mm 
 2. Entrez le diamètre intérieur du tube et l’épaisseur de paroi
-3. Sélectionnez une tonalité et une suite d’intervalles ou entrez une suite d'intervalles personnalisée
-4. Ajustez les diamètres des trous
-5. Cliquez sur **Calcul des Positions**
+3. Activez le wedge si vous en installez un
+4. Sélectionnez une tonalité, un tempérament et une suite d’intervalles ou entrez une suite d'intervalles personnalisée
+5. Ajustez les diamètres des trous
+6. Cliquez sur **Calcul des Positions**
 
 ## Crédits
 
