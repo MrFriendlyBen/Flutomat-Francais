@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enregistreur de mélodies — Flutomat</title>
+<style>
+  body {
+    font-family: system-ui, sans-serif;
+    background: #2c1e1a;
+    color: #efd9b8;
+    max-width: 720px;
+    margin: 20px auto;
+    padding: 16px;
+  }
+  h1 { font-size: 1.3em; margin-bottom: 8px; }
+  .hint { opacity: 0.8; font-size: 0.9em; margin-bottom: 16px; }
+  #pad {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    max-width: 360px;
+    margin-bottom: 16px;
+  }
+  .key {
+    aspect-ratio: 1;
+    min-height: 56px;
+    font-size: 1.3em;
+    font-weight: bold;
+    border: 1px solid #8d6e63;
+    border-radius: 8px;
+    background: linear-gradient(180deg, #efd9b8, #d7ccc8);
+    color: #3e2723;
+    cursor: pointer;
+    user-select: none;
+    touch-action: none;
+  }
+  .key[data-degree="8"] {
+    background: linear-gradient(180deg, #a5d6a7, #81c784);
+    color: #1b5e20;
+  }
+  .key.playing {
+    background: linear-gradient(180deg, #ffe082, #ffcc80);
+  }
+  .controls { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+  button.action {
+    background: #6d4c41;
+    color: #efd9b8;
+    border: 1px solid #3e2723;
+    border-radius: 6px;
+    padding: 8px 14px;
+    cursor: pointer;
+  }
+  button.action:hover { background: #8d6e63; }
+  button.action.rec-on {
+    background: #c62828;
+    color: #fff;
+  }
+  #status { margin-bottom: 10px; min-height: 1.4em; }
+  textarea {
+    width: 100%;
+    min-height: 160px;
+    background: #1a1210;
+    color: #c8e6c9;
+    border: 1px solid #6d4c41;
+    border-radius: 8px;
+    padding: 10px;
+    font-family: ui-monospace, monospace;
+    font-size: 0.85em;
+    box-sizing: border-box;
+  }
+  label { display: block; margin-top: 12px; margin-bottom: 4px; }
+  select, input[type="number"] {
+    background: #3e2723;
+    color: #efd9b8;
+    border: 1px solid #6d4c41;
+    border-radius: 4px;
+    padding: 4px 8px;
+  }
+</style>
+</head>
+<body>
+
+<h1>🎹 Enregistreur de mélodies</h1>
+<p class="hint">
+  1. Choisissez une tonalité de référence (pour l’écoute).<br>
+  2. Cliquez <strong>Enregistrer</strong>, jouez (touches 1–8 ou pavé).<br>
+  3. Tenez pour des notes longues, relâchez pour des courtes.<br>
+  4. <strong>Arrêter</strong> → copiez le code dans Flutomat.
+</p>
+
+<label>Tonalité de référence (écoute uniquement)</label>
+<select id="baseMidi">
+  <option value="60">C4</option>
+  <option value="62" selected>D4</option>
+  <option value="64">E4</option>
+  <option value="65">F4</option>
+  <option value="67">G4</option>
+  <option value="69">A4</option>
+  <option value="71">B4</option>
+  <option value="72">C5</option>
+</select>
+
+<label>Mode (intervalles, pour l’écoute)</label>
+<input type="text" id="intervals" value="221222" size="12" placeholder="221222">
+
+<div class="controls" style="margin-top: 14px;">
+  <button type="button" class="action" id="recBtn">● Enregistrer</button>
+  <button type="button" class="action" id="stopBtn">■ Arrêter</button>
+  <button type="button" class="action" id="playBtn">▶ Écouter</button>
+  <button type="button" class="action" id="clearBtn">🗑 Effacer</button>
+  <button type="button" class="action" id="copyBtn">📋 Copier le code</button>
+</div>
+
+<div id="status">Prêt</div>
+
+<div id="pad">
+  <button type="button" class="key" data-degree="1">1</button>
+  <button type="button" class="key" data-degree="2">2</button>
+  <button type="button" class="key" data-degree="3">3</button>
+  <button type="button" class="key" data-degree="4">4</button>
+  <button type="button" class="key" data-degree="5">5</button>
+  <button type="button" class="key" data-degree="6">6</button>
+  <button type="button" class="key" data-degree="7">7</button>
+  <button type="button" class="key" data-degree="8">8</button>
+</div>
+
+<label>Code à coller dans Flutomat (MELODIES)</label>
+<textarea id="output" readonly placeholder="Le code apparaîtra ici…"></textarea>
+
+<script>
+const A4 = 440;
+const MIDI_A4 = 69;
+
+function midiToFreq(midi) {
+  return A4 * Math.pow(2, (midi - MIDI_A4) / 12);
+}
+
+function buildScale() {
+  const base = parseInt(document.getElementById('baseMidi').value, 10);
+  const seq = (document.getElementById('intervals').value || '221222').replace(/\s+/g, '');
+  const intervals = seq.split('').map(n => parseInt(n, 10)).filter(n => !isNaN(n) && n > 0);
+  const midis = [base];
+  let cur = base;
+  for (const step of intervals) {
+    cur += step;
+    midis.push(cur);
+  }
+  midis.push(base + 12);
+  return midis.map(midiToFreq);
+}
+
+let audioCtx = null;
+const active = {};
+let recording = false;
+let notes = []; // {d, start, end}
+let recStart = 0;
+
+function ensureCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+function startDegree(d) {
+  if (active[d]) return;
+  const scale = buildScale();
+  let idx = Math.min(Math.max(d, 1), 8) - 1;
+  if (idx >= scale.length) idx = scale.length - 1;
+
+  const ctx = ensureCtx();
+  const t = ctx.currentTime;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = 'sine';
+  osc.frequency.value = scale[idx];
+  gain.gain.setValueAtTime(0.0001, t);
+  gain.gain.exponentialRampToValueAtTime(0.22, t + 0.015);
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start(t);
+  active[d] = { osc, gain, t0: performance.now() };
+
+  if (recording) {
+    notes.push({ d, start: performance.now() - recStart, end: null });
+  }
+
+  const btn = document.querySelector(`.key[data-degree="${d}"]`);
+  if (btn) btn.classList.add('playing');
+}
+
+function stopDegree(d) {
+  if (!active[d]) return;
+  const ctx = audioCtx;
+  const { osc, gain } = active[d];
+  const now = ctx.currentTime;
+  gain.gain.cancelScheduledValues(now);
+  gain.gain.setValueAtTime(Math.max(gain.gain.value, 0.0001), now);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.08);
+  osc.stop(now + 0.1);
+  delete active[d];
+
+  if (recording) {
+    // ferme la dernière note ouverte de ce degré
+    for (let i = notes.length - 1; i >= 0; i--) {
+      if (notes[i].d === d && notes[i].end === null) {
+        notes[i].end = performance.now() - recStart;
+        break;
+      }
+    }
+  }
+
+  const btn = document.querySelector(`.key[data-degree="${d}"]`);
+  if (btn) btn.classList.remove('playing');
+}
+
+function formatCode() {
+  const parts = notes
+    .filter(n => n.end != null)
+    .map(n => {
+      let dur = (n.end - n.start) / 1000;
+      if (dur < 0.08) dur = 0.08;
+      dur = Math.round(dur * 100) / 100;
+      return `{d:${n.d}, dur:${dur.toFixed(2)}}`;
+    });
+
+  if (!parts.length) return '';
+
+  let out = '[\n';
+  for (let i = 0; i < parts.length; i += 4) {
+    out += '    ' + parts.slice(i, i + 4).join(', ');
+    if (i + 4 < parts.length) out += ',';
+    out += '\n';
+  }
+  out += ']';
+  return out;
+}
+
+function updateOutput() {
+  document.getElementById('output').value = formatCode();
+}
+
+document.getElementById('recBtn').onclick = () => {
+  recording = true;
+  notes = [];
+  recStart = performance.now();
+  document.getElementById('recBtn').classList.add('rec-on');
+  document.getElementById('status').textContent = '● Enregistrement… jouez votre mélodie';
+  document.getElementById('output').value = '';
+};
+
+document.getElementById('stopBtn').onclick = () => {
+  recording = false;
+  // ferme les notes encore tenues
+  Object.keys(active).forEach(d => stopDegree(parseInt(d, 10)));
+  document.getElementById('recBtn').classList.remove('rec-on');
+  updateOutput();
+  document.getElementById('status').textContent =
+    notes.filter(n => n.end != null).length + ' note(s) enregistrée(s)';
+};
+
+document.getElementById('clearBtn').onclick = () => {
+  recording = false;
+  notes = [];
+  Object.keys(active).forEach(d => stopDegree(parseInt(d, 10)));
+  document.getElementById('recBtn').classList.remove('rec-on');
+  document.getElementById('output').value = '';
+  document.getElementById('status').textContent = 'Effacé';
+};
+
+document.getElementById('copyBtn').onclick = () => {
+  const text = document.getElementById('output').value;
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => {
+    document.getElementById('status').textContent = 'Code copié !';
+  });
+};
+
+document.getElementById('playBtn').onclick = () => {
+  const finished = notes.filter(n => n.end != null);
+  if (!finished.length) return;
+  const scale = buildScale();
+  const ctx = ensureCtx();
+  let t = ctx.currentTime + 0.05;
+  finished.forEach(n => {
+    let idx = Math.min(n.d, 8) - 1;
+    if (idx >= scale.length) idx = scale.length - 1;
+    let dur = (n.end - n.start) / 1000;
+    if (dur < 0.08) dur = 0.08;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = scale[idx];
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(0.2, t + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(t);
+    osc.stop(t + dur + 0.05);
+    t += dur + 0.02;
+  });
+  document.getElementById('status').textContent = 'Lecture…';
+};
+
+// Pavé
+document.querySelectorAll('.key').forEach(btn => {
+  const d = parseInt(btn.dataset.degree, 10);
+  btn.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    btn.setPointerCapture(e.pointerId);
+    startDegree(d);
+  });
+  btn.addEventListener('pointerup', () => stopDegree(d));
+  btn.addEventListener('pointercancel', () => stopDegree(d));
+});
+
+// Clavier physique
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+  if (e.repeat) return;
+  let d = null;
+  if (e.key >= '1' && e.key <= '8') d = parseInt(e.key, 10);
+  else if (e.key === '0') d = 8;
+  if (d) { e.preventDefault(); startDegree(d); }
+});
+document.addEventListener('keyup', e => {
+  let d = null;
+  if (e.key >= '1' && e.key <= '8') d = parseInt(e.key, 10);
+  else if (e.key === '0') d = 8;
+  if (d) { e.preventDefault(); stopDegree(d); }
+});
+</script>
+</body>
+</html>

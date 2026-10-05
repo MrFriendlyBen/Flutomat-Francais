@@ -1,16 +1,19 @@
 /* =========================================
-   COULEURS
+   COULEURS — même palette que Flutomat Français
    ========================================= */
 
 :root {
-    --cream: #f4efe5;
-    --paper: rgba(250, 247, 239, 0.60);
-    --brown: #61462f;
-    --brown-dark: #342719;
-    --green: #485940;
-    --green-dark: #33402e;
-    --gold: #b18a54;
-    --text: #302b26;
+    --wood-dark: #3e2723;
+    --wood-medium: #5d4037;
+    --wood-light: #8d6e63;
+    --wood-highlight: #a1887f;
+    --bg-deep: #2c1e1a;
+    --text-light: #f5e8d3;
+    --text-muted: #d7ccc8;
+    --accent: #bcaaa4;
+    --cream: #efd9b8;
+    --gold: #a1887f;
+    --shadow: rgba(0, 0, 0, 0.45);
 }
 
 
@@ -28,7 +31,7 @@ html {
 
 body {
     margin: 0;
-    color: var(--text);
+    color: var(--text-light);
 
     font-family:
         "Segoe UI",
@@ -41,8 +44,8 @@ body {
 
     background:
         linear-gradient(
-            rgba(25, 20, 15, 0.45),
-            rgba(25, 20, 15, 0.60)
+            rgba(44, 30, 26, 0.55),
+            rgba(44, 30, 26, 0.72)
         ),
         url("IMG_3902.jpg");
 
@@ -58,57 +61,50 @@ body {
 
 .hero {
     min-height: 70vh;
-
     display: flex;
     justify-content: center;
     align-items: center;
-
     padding: 50px 20px;
-
     text-align: center;
-    color: white;
+    color: var(--text-light);
 }
 
 .hero-content {
     max-width: 850px;
-
     padding: 45px 55px;
 
-    background: rgba(30, 25, 19, 0.62);
-
-    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: rgba(44, 30, 26, 0.78);
+    border: 2px solid #6d4c41;
     border-radius: 8px;
-
     backdrop-filter: blur(3px);
 
-    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.35);
+    box-shadow:
+        0 15px 45px rgba(0, 0, 0, 0.45),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .flute-icon {
-    color: #dbc498;
+    color: var(--cream);
     font-size: 2.5rem;
     margin-bottom: 5px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .hero h1 {
     margin: 0;
-
     font-family: Georgia, "Times New Roman", serif;
     font-size: clamp(2.7rem, 7vw, 5.5rem);
     font-weight: normal;
-
     line-height: 1.05;
-
-    text-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
+    color: #efd9b8;
+    text-shadow: 0 3px 8px rgba(0, 0, 0, 0.55);
 }
 
 .subtitle {
     margin: 20px auto 35px;
-
     max-width: 650px;
-
     font-size: 1.2rem;
-    color: #f2eee7;
+    color: var(--text-muted);
 }
 
 
@@ -118,16 +114,19 @@ body {
 
 .button {
     display: inline-block;
-
     padding: 13px 25px;
 
-    color: white;
-    background: var(--green);
-
+    color: #f5e8d3;
+    background: linear-gradient(to bottom, #6d4c41, #4e342e);
+    border: 1px solid #8d6e63;
     border-radius: 4px;
 
     text-decoration: none;
     font-weight: 600;
+
+    box-shadow:
+        0 3px 6px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
 
     transition:
         background 0.2s ease,
@@ -136,11 +135,9 @@ body {
 }
 
 .button:hover {
-    background: var(--green-dark);
-
+    background: linear-gradient(to bottom, #8d6e63, #5d4037);
     transform: translateY(-2px);
-
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.5);
 }
 
 
@@ -150,17 +147,18 @@ body {
 
 .content {
     width: min(1000px, calc(100% - 40px));
-
     margin: 0 auto 100px;
-
     padding: 55px 70px;
 
-    background: var(--paper);
+    background: rgba(44, 30, 26, 0.88);
+    color: var(--text-light);
 
+    border: 2px solid #6d4c41;
     border-radius: 8px;
 
     box-shadow:
-        0 15px 50px rgba(0, 0, 0, 0.40);
+        0 15px 50px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 
@@ -170,30 +168,24 @@ body {
 
 .intro {
     max-width: 800px;
-
     margin: auto;
     padding-bottom: 45px;
-
     text-align: center;
-
-    border-bottom: 1px solid #cfc4b2;
+    border-bottom: 1px solid #5d4037;
 }
 
 .intro h2,
 .philosophy h2 {
-    color: var(--brown-dark);
-
+    color: #efd9b8;
     font-family: Georgia, "Times New Roman", serif;
     font-weight: normal;
-
     font-size: 2.2rem;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
 .important {
     margin-top: 30px;
-
-    color: var(--brown);
-
+    color: var(--cream);
     font-family: Georgia, "Times New Roman", serif;
     font-size: 1.25rem;
 }
@@ -205,30 +197,24 @@ body {
 
 .step {
     display: grid;
-
     grid-template-columns: 90px 1fr;
     gap: 25px;
-
     padding: 55px 0;
-
-    border-bottom: 1px solid #d8cec0;
+    border-bottom: 1px solid #4e342e;
 }
 
 .number {
-    color: var(--gold);
-
+    color: var(--wood-highlight);
     font-family: Georgia, "Times New Roman", serif;
     font-size: 3.3rem;
-
     line-height: 1;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
 .step h2 {
     margin-top: 0;
     margin-bottom: 20px;
-
-    color: var(--brown-dark);
-
+    color: #efd9b8;
     font-family: Georgia, "Times New Roman", serif;
     font-size: 1.8rem;
     font-weight: normal;
@@ -237,6 +223,7 @@ body {
 .step p {
     margin-top: 0;
     margin-bottom: 18px;
+    color: var(--text-muted);
 }
 
 
@@ -246,15 +233,12 @@ body {
 
 blockquote {
     margin: 35px 0;
-
     padding: 20px 25px;
 
-    background: rgba(177, 138, 84, 0.10);
+    background: rgba(0, 0, 0, 0.25);
+    border-left: 4px solid #8d6e63;
 
-    border-left: 4px solid var(--gold);
-
-    color: #514536;
-
+    color: #e0d0c0;
     font-family: Georgia, "Times New Roman", serif;
     font-size: 1.1rem;
     font-style: italic;
@@ -267,25 +251,21 @@ blockquote {
 
 .philosophy {
     padding-top: 55px;
-
     text-align: center;
 }
 
 .philosophy p {
     max-width: 760px;
-
     margin-left: auto;
     margin-right: auto;
+    color: var(--text-muted);
 }
 
 .final-quote {
     margin-top: 40px !important;
-
-    color: var(--brown);
-
+    color: #efd9b8;
     font-family: Georgia, "Times New Roman", serif;
     font-size: 1.35rem;
-
     line-height: 1.8;
 }
 
@@ -301,12 +281,10 @@ blockquote {
 
 footer {
     padding: 35px 20px;
-
     text-align: center;
-
-    color: rgba(255, 255, 255, 0.9);
-
-    background: rgba(25, 20, 15, 0.77);
+    color: rgba(245, 232, 211, 0.9);
+    background: rgba(44, 30, 26, 0.92);
+    border-top: 1px solid #6d4c41;
 }
 
 footer p {
@@ -314,7 +292,7 @@ footer p {
 }
 
 footer .small {
-    color: rgba(255, 255, 255, 0.65);
+    color: rgba(215, 204, 200, 0.7);
     font-size: 0.85rem;
 }
 
@@ -326,10 +304,6 @@ footer .small {
 @media (max-width: 700px) {
 
     body {
-        /*
-         * background-attachment: fixed peut être
-         * problématique sur certains navigateurs mobiles.
-         */
         background-attachment: scroll;
     }
 
@@ -346,36 +320,4 @@ footer .small {
         font-size: 3rem;
     }
 
-    .subtitle {
-        font-size: 1.05rem;
-    }
-
-    .content {
-        width: calc(100% - 20px);
-
-        margin-bottom: 30px;
-
-        padding: 40px 25px;
-    }
-
-    .step {
-        grid-template-columns: 1fr;
-        gap: 10px;
-
-        padding: 40px 0;
-    }
-
-    .number {
-        font-size: 2.4rem;
-    }
-
-    .step h2 {
-        font-size: 1.55rem;
-    }
-
-    .intro h2,
-    .philosophy h2 {
-        font-size: 1.8rem;
-    }
-
-}
+   
