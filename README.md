@@ -31,12 +31,13 @@ Ce projet est une modernisation et une extension du calculateur original **Fluto
 - Version originale archivée :  
   [http://web.archive.org/web/20110611151055/http://www.cwo.com/\~ph_kosel/flutomat.html](http://web.archive.org/web/20110611151055/http://www.cwo.com/\~ph_kosel/flutomat.html)
 - Version sur laquelle Flutomat-Francais s'est grandement inspirée: https://github.com/unityrobot/Flutomat
+- Étant plutôt facteur de flûte amateur à la recherche d'un calculateur qui me convient et non programmeur, le développement et la modernisation du code basés sur mes idées a été faite avec l’assistance de Grok (xAI) pour l’acoustique, les tempéraments, l’interface et les correctifs successifs et nombreux. Et à quelques reprises mineures l'IA Copilot (Microsoft) quand xAI me bloquait la version gratuite de Grok pour avoir de l'argent... ;)
 
 Les calculs acoustiques sont basés sur les travaux d’**Arthur H. Benade** (*Fundamentals of Musical Acoustics*).
 
 ## Licence
 
-Ce projet est distribué sous licence MIT.
+Ce projet est distribué sous licence MIT. (Il n'existe pas de texte officiel en français.)
 
 MIT License
 
