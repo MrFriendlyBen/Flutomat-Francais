@@ -113,7 +113,27 @@
                     <!-- Add more keys as needed -->
                 </select>
                 <div>
-                    <div>
+
+                <div style="margin: 10px 0;">
+                    <label style="font-weight: 600;">Tempérament :</label><br>
+                    <label style="margin-right: 12px;">
+                        <input type="radio" name="temperament" value="equal" checked> Égal
+                    </label>
+                    <label style="margin-right: 12px;">
+                        <input type="radio" name="temperament" value="harmonic1"> Harmonique 1
+                    </label>
+                    <label style="margin-right: 12px;">
+                        <input type="radio" name="temperament" value="harmonic2"> Harmonique 2
+                    </label>
+                    <label>
+                        <input type="radio" name="temperament" value="pythagorean"> Pythagoricien
+                    </label>
+                    <p style="font-size: 0.8em; opacity: 0.75; margin-top: 4px;">
+                        Ajuste automatiquement les fréquences (cents) selon le tempérament choisi.
+                    </p>
+                </div>
+                
+                <div>
                 <label for="scalePreset">Mode / Gamme :</label>
                 <select id="scalePreset">
                     <option value="">— Personnalisé —</option>
@@ -214,6 +234,7 @@
                         <th>Trous</th>
                         <th>Note</th>
                         <th>Fréquence (Hz)</th>
+                        <th>Cents</th>
                         <th>Diamètre</th>
                         <th>Distance</th>
                         <th style="width:70px;">2<sup>e</sup> oct.</th>
@@ -225,6 +246,7 @@
                         <td>Embouchure</td>
                         <td>—</td>
                         <td>---------</td>
+                        <td><output id="centsEmb">0</output></td>
                         <td><input type="text" name="embouchureDiameter" id="embouchureDiameter" min="0.2" value="3/8"
                                 step="any" required></td>
                         <td style="display:none"><output name="resultEmbouchure" id="resultEmbouchure"
@@ -241,6 +263,7 @@
                         <td>Trou 7</td>
                         <td><output id="note7"></output></td>
                         <td><input type="number" name="holeFrequency" id="freq7" value="587.33" step="any" required></td>
+                        <td><output id="cents7">0</output></td>
                         <td><input type="text" name="holeDiameter" id="diam7" min="0.2" value="3/8" step="any" required></td>
                         <td style="display:none"><output name="resultHole" id="result7"></output></td>
                         <td><output id="result7Fraction"></output></td>
@@ -267,8 +290,8 @@
                     <tr class="hole-row" data-hole-index="5">
                         <td>Trou 6</td>
                         <td><output id="note6"></output></td>
-                        <td><input type="number" name="holeFrequency" id="freq6" value="554.37" step="any" required>
-                        </td>
+                        <td><input type="number" name="holeFrequency" id="freq6" value="554.37" step="any" required></td>
+                        <td><output id="cents6">0</output></td>
                         <td><input type="text" name="holeDiameter" id="diam6" min="0.2" value="3/8" step="any" required></td>
                         <td style="display:none"><output name="resultHole" id="result6"></output></td>
 						<td><output id="result6Fraction"></output></td>
@@ -304,8 +327,8 @@
                     <tr class="hole-row" data-hole-index="4">
                         <td>Trou 5</td>
                         <td><output id="note5"></output></td>
-                        <td><input type="number" name="holeFrequency" id="freq5" value="493.88" step="any" required>
-                        </td>
+                        <td><input type="number" name="holeFrequency" id="freq5" value="493.88" step="any" required></td>
+                        <td><output id="cents5">0</output></td>
                         <td><input type="text" name="holeDiameter" id="diam5" min="0.2" value="3/8" step="any" required></td>
                         <td style="display:none"><output name="resultHole" id="result5"></output></td>
 						<td><output id="result5Fraction"></output></td>
@@ -341,8 +364,8 @@
                     <tr class="hole-row" data-hole-index="3">
                         <td>Trou 4</td>
                         <td><output id="note4"></output></td>
-                        <td><input type="number" name="holeFrequency" id="freq4" value="440.00" step="any" required>
-                        </td>
+                        <td><input type="number" name="holeFrequency" id="freq4" value="440.00" step="any" required></td>
+                        <td><output id="cents4">0</output></td>
                         <td><input type="text" name="holeDiameter" id="diam4" min="0.2" value="5/16" step="any" required></td>
                         <td style="display:none"><output name="resultHole" id="result4"></output></td>
 						<td><output id="result4Fraction"></output></td>
@@ -378,8 +401,8 @@
                     <tr class="hole-row" data-hole-index="2">
                         <td>Trou 3</td>
                         <td><output id="note3"></output></td>
-                        <td><input type="number" name="holeFrequency" id="freq3" value="392.00" step="any" required>
-                        </td>
+                        <td><input type="number" name="holeFrequency" id="freq3" value="392.00" step="any" required></td>
+                        <td><output id="cents3">0</output></td>
                         <td><input type="text" name="holeDiameter" id="diam3" min="0.2" value="5/16" step="any" required></td>
                         <td style="display:none"><output name="resultHole" id="result3"></output></td>
 						<td><output id="result3Fraction"></output></td>
@@ -415,8 +438,8 @@
                     <tr class="hole-row" data-hole-index="1">
                         <td>Trou 2</td>
                         <td><output id="note2"></output></td>
-                        <td><input type="number" name="holeFrequency" id="freq2" value="369.99" step="any" required>
-                        </td>
+                        <td><input type="number" name="holeFrequency" id="freq2" value="369.99" step="any" required></td>
+                        <td><output id="cents2">0</output></td>
                         <td><input type="text" name="holeDiameter" id="diam2" min="0.2" value="7/16" step="any" required></td>
                         <td style="display:none"><output name="resultHole" id="result2"></output></td>
 						<td><output id="result2Fraction"></output></td>
@@ -452,8 +475,8 @@
                     <tr class="hole-row" data-hole-index="0">
                         <td>Trou 1</td>
                         <td><output id="note1"></output></td>
-                        <td><input type="number" name="holeFrequency" id="freq1" value="329.63" step="any" required>
-                        </td>
+                        <td><input type="number" name="holeFrequency" id="freq1" value="329.63" step="any" required></td>
+                        <td><output id="cents1">0</output></td>
                         <td><input type="text" name="holeDiameter" id="diam1" min="0.2" value="1/4" step="any" required></td>
                         <td style="display:none"><output name="resultHole" id="result1"></output></td>
 						<td><output id="result1Fraction"></output></td>
@@ -492,6 +515,7 @@
                         <td><output id="noteEnd"></output></td>
                         <td><input type="number" name="endFrequency" id="endFrequency" value="293.66" step="any"
                                 required></td>
+                        <td><output id="centsEnd">0</output></td>
                         <td>---------</td>
                         <td><output name="resultEnd" id="resultEnd">0.000</output></td> <!-- Always 0 -->
                     </tr>

@@ -100,6 +100,58 @@ const MELODIES = {
         {d:1, dur:0.60}
     ]
 };
+
+/**
+ * Écarts en cents par rapport au tempérament égal.
+ * Index = nombre de demi-tons depuis la tonique (0..11).
+ * Valeurs alignées sur NAFlutomat pour m3, P4, P5, m7.
+ */
+const TEMPERAMENT_CENTS = {
+    equal: [
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    ],
+    // Harmonic-1 (NAFlutomat) : m3=+16, P4=-2, P5=+2, m7=+18 (9:5)
+    harmonic1: [
+        0,   // 0  unisson
+        0,   // 1  m2
+        +4,  // 2  M2  (9/8 approx)
+        +16, // 3  m3  6:5
+        -14, // 4  M3  5:4
+        -2,  // 5  P4  4:3
+        0,   // 6  tritón
+        +2,  // 7  P5  3:2
+        +14, // 8  m6  8:5
+        -16, // 9  M6  5:3
+        +18, // 10 m7  9:5
+        -12  // 11 M7  15:8
+    ],
+    // Harmonic-2 : m7 en 16:9 (−4) au lieu de 9:5
+    harmonic2: [
+        0, 0, +4, +16, -14, -2, 0, +2, +14, -16, -4, -12
+    ],
+    // Pythagorean (NAFlutomat) : m3=-6, P4=-2, P5=+2, m7=-4
+    pythagorean: [
+        0,   // 0
+        -10, // 1
+        +4,  // 2
+        -6,  // 3  32:27
+        +8,  // 4
+        -2,  // 5  4:3
+        +2,  // 6
+        +2,  // 7  3:2
+        -8,  // 8  128:81
+        +6,  // 9
+        -4,  // 10 16:9
+        +10  // 11
+    ]
+};
+
+/** Applique un décalage en cents à une fréquence (Hz). */
+function applyCents(freqHz, cents) {
+    if (!cents) return freqHz;
+    return freqHz * Math.pow(2, cents / 1200);
+}
+
 /**
  * Represents and calculates flute dimensions.
  * @class
@@ -221,7 +273,6 @@ class FluteCalculator {
             this.units = 'inches';
         }
 
-
         // Restaurer les préférences
         try {
             const saved = localStorage.getItem('flutomat_prefs');
@@ -260,6 +311,13 @@ class FluteCalculator {
                             this.holeDiameterInputs[i].value = val;
                         }
                     });
+                }
+
+                if (prefs.temperament) {
+                    const r = document.querySelector(
+                        `input[name="temperament"][value="${prefs.temperament}"]`
+                    );
+                    if (r) r.checked = true;
                 }
 
                 // Wedge Fajardo
@@ -367,6 +425,14 @@ class FluteCalculator {
                     this.savePreferences();
             });
         });
+
+        document.querySelectorAll('input[name="temperament"]').forEach(radio => {
+            radio.addEventListener("change", () => {
+                this.updateFrequenciesFromKey();
+                this.savePreferences?.();
+            });
+        });
+
         //this.keySelector.addEventListener('change', () => this.updateFrequenciesFromKey());
             this.keySelector.addEventListener('change', () => this.updateFrequenciesFromKey());
             this.intervalSequenceInput.addEventListener('change', () => this.updateFrequenciesFromKey());
@@ -780,45 +846,70 @@ class FluteCalculator {
             return;
         }
 
-        // Lire la séquence (ex: "322212")
-        const sequenceStr = (this.intervalSequenceInput?.value || "2212221").replace(/\s+/g, "");
+        const sequenceStr = (this.intervalSequenceInput?.value || "221222").replace(/\s+/g, "");
         const intervals = sequenceStr.split("").map(n => parseInt(n, 10)).filter(n => !isNaN(n) && n > 0);
 
-        // Note de base
-        let currentMidi = baseMidiNote;
-        this.endFrequencyInput.value = this.midiNoteToFrequency(currentMidi).toFixed(2);
+        // Tempérament choisi
+        const temper = document.querySelector('input[name="temperament"]:checked')?.value || "equal";
+        const centsTable = TEMPERAMENT_CENTS[temper] || TEMPERAMENT_CENTS.equal;
 
-        // Remplir les trous
+        // Fondamentale (tous fermés) — en général 0 cent
+        let currentMidi = baseMidiNote;
+        let semitonesFromRoot = 0;
+        let freq = applyCents(this.midiNoteToFrequency(currentMidi), centsTable[0]);
+        this.endFrequencyInput.value = freq.toFixed(2);
+        let cents = centsTable[0] || 0;
+        this.endFrequencyInput.value = applyCents(this.midiNoteToFrequency(currentMidi), cents).toFixed(2);
+        const centsEndEl = document.getElementById("centsEnd");
+        if (centsEndEl) {
+            centsEndEl.textContent = cents === 0 ? "0" : (cents > 0 ? "+" : "") + cents;
+        }
+        const centsEmbEl = document.getElementById("centsEmb");
+        if (centsEmbEl) centsEmbEl.textContent = "—";
+
+        // Trous
         for (let i = 0; i < this.HOLE_COUNT; i++) {
             if (i < intervals.length) {
                 currentMidi += intervals[i];
-                this.holeFrequencyInputs[i].value = this.midiNoteToFrequency(currentMidi).toFixed(2);
+                semitonesFromRoot += intervals[i];
+                cents = centsTable[semitonesFromRoot % 12] || 0;
+                const freq = applyCents(this.midiNoteToFrequency(currentMidi), cents);
+                this.holeFrequencyInputs[i].value = freq.toFixed(2);
+
+                const centsEl = document.getElementById(`cents${i + 1}`);
+                if (centsEl) {
+                    centsEl.textContent = cents === 0 ? "0" : (cents > 0 ? "+" : "") + cents;
+                }
             } else {
-                this.holeFrequencyInputs[i].value = "";   // laisse vide
+                this.holeFrequencyInputs[i].value = "";
+                const centsEl = document.getElementById(`cents${i + 1}`);
+                if (centsEl) centsEl.textContent = "";
             }
         }
 
         this.activeHoleCount = Math.min(intervals.length, this.HOLE_COUNT);
-
         this.updateVisibleHoles();
 
-        // Afficher les noms de notes
+        // Noms de notes
         for (let i = 0; i < this.HOLE_COUNT; i++) {
-                const noteEl = document.getElementById(`note${i + 1}`);
+            const noteEl = document.getElementById(`note${i + 1}`);
             if (noteEl) {
-                const freq = parseFloat(this.holeFrequencyInputs[i].value);
-                noteEl.value = this.frequencyToNoteName(freq);
+                const f = parseFloat(this.holeFrequencyInputs[i].value);
+                noteEl.value = this.frequencyToNoteName(f);
             }
-            // Note de base (fin de flûte)
-                const noteEndEl = document.getElementById('noteEnd');
-            if (noteEndEl) {
-                const baseFreq = parseFloat(this.endFrequencyInput.value);
-                noteEndEl.value = this.frequencyToNoteName(baseFreq);
-            }
+        }
+        const noteEndEl = document.getElementById("noteEnd");
+        if (noteEndEl) {
+            noteEndEl.value = this.frequencyToNoteName(parseFloat(this.endFrequencyInput.value));
+        }
+
+        // Recalcul des positions si déjà initialisé
+        if (typeof this.calculateAllPositions === "function") {
+            this.calculateAllPositions();
         }
     }
 
-    /** Construit la gamme actuelle (fréquences) selon tonalité + mode */
+    /** Construit la gamme actuelle (fréquences) selon tonalité + mode + tempérament */
     buildCurrentScale() {
         const baseMidi = parseInt(this.keySelector.value, 10);
         if (isNaN(baseMidi)) return [];
@@ -826,15 +917,28 @@ class FluteCalculator {
         const sequenceStr = (this.intervalSequenceInput?.value || "221222").replace(/\s+/g, "");
         const intervals = sequenceStr.split("").map(n => parseInt(n, 10)).filter(n => !isNaN(n) && n > 0);
 
-        const notesMidi = [baseMidi];
-        let current = baseMidi;
-        for (let i = 0; i < intervals.length; i++) {
-            current += intervals[i];
-            notesMidi.push(current);
-        }
-        notesMidi.push(baseMidi + 12); // octave
+        const temper = document.querySelector('input[name="temperament"]:checked')?.value || "equal";
+        const centsTable = TEMPERAMENT_CENTS[temper] || TEMPERAMENT_CENTS.equal;
 
-        return notesMidi.map(midi => this.midiNoteToFrequency(midi));
+        const freqs = [];
+        let currentMidi = baseMidi;
+        let semitonesFromRoot = 0;
+
+        // Degré 1 = fondamentale
+        freqs.push(applyCents(this.midiNoteToFrequency(currentMidi), centsTable[0] || 0));
+
+        // Degrés suivants = intervalles de la gamme
+        for (let i = 0; i < intervals.length; i++) {
+            currentMidi += intervals[i];
+            semitonesFromRoot += intervals[i];
+            const cents = centsTable[semitonesFromRoot % 12] || 0;
+            freqs.push(applyCents(this.midiNoteToFrequency(currentMidi), cents));
+        }
+
+        // Octave (degré 8) — 0 cent en général
+        freqs.push(applyCents(this.midiNoteToFrequency(baseMidi + 12), centsTable[0] || 0));
+
+        return freqs;
     }
 
     /** Joue un degré (1–8) avec le son flûte */
@@ -976,7 +1080,11 @@ class FluteCalculator {
         }
         notesMidi.push(baseMidi + 12); // octave
 
-        const scale = notesMidi.map(midi => this.midiNoteToFrequency(midi));
+        const scale = this.buildCurrentScale();
+        if (!scale.length) {
+            this.isPlayingScale = false;
+            return;
+        }
         const pattern = MELODIES[styleName] || MELODIES.folk;
 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -1053,7 +1161,11 @@ class FluteCalculator {
             notesMidi.push(current);
         }
 
-        const frequencies = notesMidi.map(midi => this.midiNoteToFrequency(midi));
+        const frequencies = this.buildCurrentScale();
+        if (!frequencies.length) {
+            this.isPlayingScale = false;
+            return;
+        }
 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -1169,7 +1281,9 @@ class FluteCalculator {
 
             // Wedge Fajardo
             fajardoWedge: this.fajardoWedgeCheckbox?.checked || false,
-            wedgeIntensity: this.wedgeIntensityInput?.value || "50"
+            wedgeIntensity: this.wedgeIntensityInput?.value || "50",
+            // Tempérament
+            temperament: document.querySelector('input[name="temperament"]:checked')?.value || "equal",
         };
         localStorage.setItem('flutomat_prefs', JSON.stringify(prefs));
     }
