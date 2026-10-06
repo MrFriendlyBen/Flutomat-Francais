@@ -29,7 +29,7 @@ html {
     scroll-behavior: smooth;
 }
 
-body {
+/*body {
     margin: 0;
     color: var(--text-light);
 
@@ -52,8 +52,20 @@ body {
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
+}*/
+body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background-color: var(--bg-deep); /* couleur de secours si l'image ne charge pas */
+    background-image: url("IMG_3902.jpg");
+    background-size: cover;       /* couvre tout l'écran */
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed; /* optionnel : fond fixe au scroll */
+    color: var(--text-light);
+    margin: 0;
+    padding: 20px;
+    line-height: 1.5;
 }
-
 
 /* =========================================
    ENTÊTE
