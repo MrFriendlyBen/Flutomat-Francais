@@ -372,6 +372,21 @@ form {
     background: linear-gradient(180deg, #a5d6a7, #81c784);
     color: #1b5e20;
 }
+/* Liens visibles sur fond bois */
+a {
+    color: #efd9b8;              /* même crème que le titre */
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+a:hover {
+    color: #fff8e7;              /* un peu plus clair au survol */
+    text-decoration-thickness: 2px;
+}
+
+a:visited {
+    color: #d7ccc8;              /* légèrement plus doux après visite */
+}
 
 #pianoPad .piano-key[data-degree="8"]:hover {
     background: linear-gradient(180deg, #c8e6c9, #a5d6a7);
