@@ -50,7 +50,7 @@
                 <input type="text" name="boreDiameter" id="boreDiameter" min="0.01" value="3/4" step="any" required>
             </div>
             <div>
-                <label for="wallThickness">Épaisseur de la paroi:</label>
+                <label for="wallThickness">Épaisseur de la paroi Globale:</label>
                 <input type="text" name="wallThickness" id="wallThickness" value="1/8" required>
             </div>
             <div style="margin-top: 12px; padding: 12px 14px; background: rgba(255,255,255,0.05); border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);">
@@ -236,6 +236,7 @@
                         <th>Fréquence (Hz)</th>
                         <th>Cents</th>
                         <th>Diamètre</th>
+                        <th title="Épaisseur locale ou longueur du tunnel. Vide = paroi globale">Tunnel / paroi</th>
                         <th>Distance</th>
                         <th style="width:70px;">2<sup>e</sup> oct.</th>
 						<!-- <th>Distance (Fraction)</th> -->
@@ -249,6 +250,7 @@
                         <td><output id="centsEmb">0</output></td>
                         <td><input type="text" name="embouchureDiameter" id="embouchureDiameter" min="0.2" value="3/8"
                                 step="any" required></td>
+                        <td>—</td>
                         <td style="display:none"><output name="resultEmbouchure" id="resultEmbouchure"
                                 for="embouchureDiameter boreDiameter wallThickness"></output></td>
 						<td>
@@ -265,6 +267,7 @@
                         <td><input type="number" name="holeFrequency" id="freq7" value="587.33" step="any" required></td>
                         <td><output id="cents7">0</output></td>
                         <td><input type="text" name="holeDiameter" id="diam7" min="0.2" value="3/8" step="any" required></td>
+                        <td><input type="text" name="holeWall" id="wall7" value="" placeholder="paroi" title="Vide = paroi globale"></td>
                         <td style="display:none"><output name="resultHole" id="result7"></output></td>
                         <td><output id="result7Fraction"></output></td>
                         <td class="gauge-cell">
@@ -293,6 +296,7 @@
                         <td><input type="number" name="holeFrequency" id="freq6" value="554.37" step="any" required></td>
                         <td><output id="cents6">0</output></td>
                         <td><input type="text" name="holeDiameter" id="diam6" min="0.2" value="3/8" step="any" required></td>
+                        <td><input type="text" name="holeWall" id="wall6" value="" placeholder="paroi" title="Vide = paroi globale"></td>
                         <td style="display:none"><output name="resultHole" id="result6"></output></td>
 						<td><output id="result6Fraction"></output></td>
                         <td class="gauge-cell">
@@ -330,6 +334,7 @@
                         <td><input type="number" name="holeFrequency" id="freq5" value="493.88" step="any" required></td>
                         <td><output id="cents5">0</output></td>
                         <td><input type="text" name="holeDiameter" id="diam5" min="0.2" value="3/8" step="any" required></td>
+                        <td><input type="text" name="holeWall" id="wall5" value="" placeholder="paroi" title="Vide = paroi globale"></td>
                         <td style="display:none"><output name="resultHole" id="result5"></output></td>
 						<td><output id="result5Fraction"></output></td>
                         <td class="gauge-cell">
@@ -367,6 +372,7 @@
                         <td><input type="number" name="holeFrequency" id="freq4" value="440.00" step="any" required></td>
                         <td><output id="cents4">0</output></td>
                         <td><input type="text" name="holeDiameter" id="diam4" min="0.2" value="5/16" step="any" required></td>
+                        <td><input type="text" name="holeWall" id="wall4" value="" placeholder="paroi" title="Vide = paroi globale"></td>
                         <td style="display:none"><output name="resultHole" id="result4"></output></td>
 						<td><output id="result4Fraction"></output></td>
                         <td class="gauge-cell">
@@ -404,6 +410,7 @@
                         <td><input type="number" name="holeFrequency" id="freq3" value="392.00" step="any" required></td>
                         <td><output id="cents3">0</output></td>
                         <td><input type="text" name="holeDiameter" id="diam3" min="0.2" value="5/16" step="any" required></td>
+                        <td><input type="text" name="holeWall" id="wall3" value="" placeholder="paroi" title="Vide = paroi globale"></td>
                         <td style="display:none"><output name="resultHole" id="result3"></output></td>
 						<td><output id="result3Fraction"></output></td>
                         <td class="gauge-cell">
@@ -441,6 +448,7 @@
                         <td><input type="number" name="holeFrequency" id="freq2" value="369.99" step="any" required></td>
                         <td><output id="cents2">0</output></td>
                         <td><input type="text" name="holeDiameter" id="diam2" min="0.2" value="7/16" step="any" required></td>
+                        <td><input type="text" name="holeWall" id="wall2" value="" placeholder="paroi" title="Vide = paroi globale"></td>
                         <td style="display:none"><output name="resultHole" id="result2"></output></td>
 						<td><output id="result2Fraction"></output></td>
                         <td class="gauge-cell">
@@ -478,6 +486,7 @@
                         <td><input type="number" name="holeFrequency" id="freq1" value="329.63" step="any" required></td>
                         <td><output id="cents1">0</output></td>
                         <td><input type="text" name="holeDiameter" id="diam1" min="0.2" value="1/4" step="any" required></td>
+                        <td><input type="text" name="holeWall" id="wall1" value="" placeholder="paroi" title="Vide = paroi globale"></td>
                         <td style="display:none"><output name="resultHole" id="result1"></output></td>
 						<td><output id="result1Fraction"></output></td>
                         <td class="gauge-cell">
@@ -517,6 +526,7 @@
                                 required></td>
                         <td><output id="centsEnd">0</output></td>
                         <td>---------</td>
+                        <td>—</td>
                         <td><output name="resultEnd" id="resultEnd">0.000</output></td> <!-- Always 0 -->
                     </tr>
                 </tbody>

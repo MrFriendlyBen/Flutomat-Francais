@@ -213,6 +213,8 @@ class FluteCalculator {
         /** @type {HTMLInputElement[]} */
         this.holeFrequencyInputs = [];
         /** @type {HTMLInputElement[]} */
+        this.holeWallInputs = [];
+        /** @type {HTMLInputElement[]} */
         this.holeDiameterInputs = [];
         /** @type {HTMLOutputElement[]} */
         this.holeResultOutputs = [];
@@ -224,6 +226,7 @@ class FluteCalculator {
             // Store in reverse order of display (index 0 = lowest pitch hole 1)
             this.holeFrequencyInputs[index] = row.querySelector('input[name="holeFrequency"]');
             this.holeDiameterInputs[index] = row.querySelector('input[name="holeDiameter"]');
+            this.holeWallInputs[index] = row.querySelector('input[name="holeWall"]');
             this.holeResultOutputs[index] = row.querySelector('output[name="resultHole"]');
 			this.holeFractionOutputs[index] = document.getElementById(`result${index+1}Fraction`);
         });
@@ -424,6 +427,14 @@ class FluteCalculator {
                 this.calculateAllPositions();
                     this.savePreferences();
             });
+
+            if (this.holeWallInputs[index]) {
+                this.holeWallInputs[index].addEventListener("change", () => {
+                    this.calculateAllPositions();
+                    this.savePreferences?.();
+                });
+            }
+
         });
 
         document.querySelectorAll('input[name="temperament"]').forEach(radio => {
@@ -736,9 +747,26 @@ class FluteCalculator {
                 diamInput.style.borderColor = '';
             }
 
+            // Paroi / tunnel local (vide = paroi globale)
+            let wallLocal = NaN;
+            const wallInput = this.holeWallInputs[i];
+            if (wallInput && wallInput.value.trim() !== "") {
+                wallLocal = this.parseFraction(wallInput.value);
+                if (isNaN(wallLocal) || wallLocal < 0) {
+                    wallInput.style.borderColor = "red";
+                    holeValid = false;
+                    holeErrors.push(`Tunnel/paroi du trou ${i + 1}`);
+                } else {
+                    wallInput.style.borderColor = "";
+                }
+            } else if (wallInput) {
+                wallInput.style.borderColor = "";
+            }
+
             this.holes[i] = {
                 frequency: holeValid ? freq : NaN,
                 diameter: holeValid ? diam : NaN,
+                wallThickness: (!isNaN(wallLocal) && wallLocal >= 0) ? wallLocal : this.wallThickness,
                 acousticPosition: NaN,
                 physicalPosition: NaN,
             };
@@ -1317,9 +1345,14 @@ class FluteCalculator {
         }
     }
     calculateEffectiveHoleHeight(holeIndex) {
-        const diameter = this.holes[holeIndex]?.diameter;
-        if (isNaN(this.wallThickness) || isNaN(diameter)) return NaN;
-        return this.wallThickness + this.HOLE_HEIGHT_EXTENSION_FACTOR * diameter;
+        const hole = this.holes[holeIndex];
+        if (!hole) return NaN;
+        const diameter = hole.diameter;
+        const wall = (!isNaN(hole.wallThickness) && hole.wallThickness >= 0)
+            ? hole.wallThickness
+            : this.wallThickness;
+        if (isNaN(wall) || isNaN(diameter)) return NaN;
+        return wall + this.HOLE_HEIGHT_EXTENSION_FACTOR * diameter;
     }
 
     /**
@@ -1449,12 +1482,17 @@ class FluteCalculator {
      * @returns {number} The closed hole length correction in current units. Returns NaN if input invalid.
      */
     calculateClosedHoleCorrection(holeIndex) {
-        const diameter = this.holes[holeIndex]?.diameter;
-        if (isNaN(this.wallThickness) || isNaN(diameter) || isNaN(this.boreDiameter) || this.boreDiameter === 0) {
+        const hole = this.holes[holeIndex];
+        if (!hole) return NaN;
+        const diameter = hole.diameter;
+        const wall = (!isNaN(hole.wallThickness) && hole.wallThickness >= 0)
+            ? hole.wallThickness
+            : this.wallThickness;
+        if (isNaN(wall) || isNaN(diameter) || isNaN(this.boreDiameter) || this.boreDiameter === 0) {
             return NaN;
         }
         const ratio = diameter / this.boreDiameter;
-        return 0.25 * this.wallThickness * ratio * ratio;
+        return 0.25 * wall * ratio * ratio;
     }
 
     /**
